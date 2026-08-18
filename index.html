@@ -14,13 +14,14 @@ html,body{margin:0;background:#111;color:#fff;font-family:system-ui,-apple-syste
 #gameWrap{position:relative;flex:1;min-height:0;background:#000}
 canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 #msg{position:absolute;left:4%;right:4%;bottom:3%;background:#050505eF;border:3px solid #fff;border-radius:8px;padding:10px 12px;min-height:78px;font-weight:700;line-height:1.45;display:none;z-index:5}
-#controls{height:190px;position:relative;background:#202020;border-top:2px solid #555;padding-bottom:env(safe-area-inset-bottom)}
-.dpad{position:absolute;left:18px;top:12px;width:150px;height:150px}
-.btn{position:absolute;border:2px solid #aaa;background:#353535;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:none}
-.dir{width:50px;height:50px;border-radius:9px;font-size:23px}
-#up{left:50px;top:0}#left{left:0;top:50px}#right{left:100px;top:50px}#down{left:50px;top:100px}
-#abtn{right:25px;top:35px;width:68px;height:68px;border-radius:50%;background:#7b2020}
-#menuBtn{right:105px;top:95px;width:62px;height:44px;border-radius:10px;font-size:12px}
+#controls{height:210px;position:relative;background:#202020;border-top:2px solid #555;padding-bottom:env(safe-area-inset-bottom);overflow:hidden}
+.btn{position:absolute;border:2px solid #aaa;background:#353535;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:none;z-index:3}
+#controls:after{content:'';position:absolute;left:50%;top:18px;bottom:18px;width:1px;background:#ffffff22;pointer-events:none}
+#joystick{position:absolute;left:18px;top:28px;width:124px;height:124px;border-radius:50%;background:#2e2e2e;border:3px solid #777;touch-action:none;box-shadow:inset 0 0 0 10px #242424}
+#stick{position:absolute;left:40px;top:40px;width:44px;height:44px;border-radius:50%;background:#777;border:3px solid #bbb;box-shadow:0 3px 8px #0008;pointer-events:none}
+#joyHint{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:12px;color:#bbb;font-weight:700}
+#abtn{right:26px;top:28px;width:76px;height:76px;border-radius:50%;background:#7b2020;font-size:24px}
+#menuBtn{right:28px;top:122px;width:74px;height:44px;border-radius:10px;font-size:12px}
 .panel{position:absolute;inset:3%;background:#080808f5;border:3px solid #fff;border-radius:9px;padding:14px;z-index:10;overflow:auto;display:none}
 .panel h2{margin:0 0 10px;font-size:20px}.panel button,.choice{width:100%;padding:12px;margin:5px 0;border:2px solid #aaa;border-radius:7px;background:#252525;color:white;font-weight:800;font-size:15px}
 .row{display:flex;gap:7px}.row>*{flex:1}.small{font-size:12px;color:#ccc}
@@ -48,11 +49,12 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 </div>
 </div>
 <div id="controls">
-<div class="dpad">
-<div class="btn dir" id="up">▲</div><div class="btn dir" id="left">◀</div>
-<div class="btn dir" id="right">▶</div><div class="btn dir" id="down">▼</div>
-</div>
-<div class="btn" id="abtn">A</div><div class="btn" id="menuBtn">MENU</div>
+  <div id="joystick">
+    <div id="stick"></div>
+    <div id="joyHint">移動</div>
+  </div>
+  <div class="btn" id="abtn">A</div>
+  <div class="btn" id="menuBtn">MENU</div>
 </div>
 </div>
 <script>
@@ -100,7 +102,7 @@ const maps={
   {x:6,y:9,t:"大魔王タクソーン？そら強いやろ。\n名前に『大』ついとるし。"},
   {x:10,y:11,t:"洞窟のまっちゃん倒してきてや！",quest:1},
   {x:3,y:11,t:"重要なヒント欲しい？\nワシも欲しいわ。"}
- ],exit:{x:7,y:14,to:'field',tx:3,ty:12}},
+ ],exit:{x:7,y:13,to:'field',tx:3,ty:12}},
  kyoto:{name:'キョウト',kind:'town',bg:'#c6b98d',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],
  buildings:[
   {x:1,y:1,w:4,h:3,label:'武器',type:'weapon'},
@@ -113,7 +115,7 @@ const maps={
   {x:5,y:10,t:"洞窟で迷わはったら大変どすなぁ。\nまあ、あの程度なら迷わへんと思いますけど。"},
   {x:10,y:11,t:"ニシはんを倒していただけると助かります。\n勇者様なら当然できますやろ？",quest:2},
   {x:3,y:11,t:"お疲れの顔してはりますなぁ。\n宿屋という便利な建物、ご存じどす？"}
- ],exit:{x:7,y:14,to:'field',tx:11,ty:12}},
+ ],exit:{x:7,y:13,to:'field',tx:11,ty:12}},
  field:{name:'ワールドマップ',kind:'field',bg:'#4f9a4f',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],
  spots:[
   {x:3,y:13,to:'osaka',tx:7,ty:13,label:'オオサカ'},
@@ -123,12 +125,12 @@ const maps={
   {x:7,y:2,to:'castle',tx:7,ty:11,label:'魔王の屋敷',locked:true}
  ]},
  cave1:{name:'まっちゃんの洞窟',kind:'dungeon',bg:'#39353a',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15],[3,3,8,1],[3,7,1,5],[7,5,1,6],[10,7,1,5]],
- exit:{x:7,y:14,to:'field',tx:3,ty:6},boss:{x:7,y:1,id:'mat'},chests:[{x:2,y:5,id:'c1a',g:80},{x:12,y:9,id:'c1b',item:'herb'},{x:5,y:12,id:'c1c',equip:['sword',2]}]},
+ exit:{x:7,y:13,to:'field',tx:3,ty:6},boss:{x:7,y:1,id:'mat'},chests:[{x:2,y:5,id:'c1a',g:80},{x:12,y:9,id:'c1b',item:'herb'},{x:5,y:12,id:'c1c',equip:['sword',2]}]},
  cave2:{name:'ニシの洞窟',kind:'dungeon',bg:'#313945',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15],[2,3,10,1],[4,6,1,6],[8,5,1,7],[11,7,1,5]],
- exit:{x:7,y:14,to:'field',tx:11,ty:6},boss:{x:7,y:1,id:'nishi'},chests:[{x:12,y:5,id:'c2a',g:160},{x:2,y:10,id:'c2b',item:'water'},{x:6,y:12,id:'c2c',equip:['body',2]}]},
- castle:{name:'大魔王の屋敷',kind:'castle',bg:'#321d38',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],boss:{x:7,y:4,id:'taku'},exit:{x:7,y:14,to:'field',tx:7,ty:3}}
+ exit:{x:7,y:13,to:'field',tx:11,ty:6},boss:{x:7,y:1,id:'nishi'},chests:[{x:12,y:5,id:'c2a',g:160},{x:2,y:10,id:'c2b',item:'water'},{x:6,y:12,id:'c2c',equip:['body',2]}]},
+ castle:{name:'大魔王の屋敷',kind:'castle',bg:'#321d38',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],boss:{x:7,y:4,id:'taku'},exit:{x:7,y:13,to:'field',tx:7,ty:3}}
 };
-function newGame(){state=baseState();document.getElementById('title').style.display='none';showText("世界は大魔王タクソーンに支配されようとしていた！\nなぜか勇者に選ばれたこうせいは、一人で旅立った！",()=>{state.flags.quest1=true});render();}
+function newGame(){state=baseState();document.getElementById('title').style.display='none';showText("世界は大魔王タクソーンに支配されようとしていた！\nなぜか勇者に選ばれたこうせいは、一人で旅立った！\n\nまずは町の下にある黄色い「出口」へ向かおう！",()=>{state.flags.quest1=true});render();}
 function continueGame(){let s=localStorage.getItem('koseiRPG');if(!s){showTitleMsg('セーブデータがない！');return} state=JSON.parse(s);document.getElementById('title').style.display='none';render();}
 function showTitleMsg(t){alert(t)}
 function saveGame(){state.save={map:state.map,x:state.x,y:state.y};localStorage.setItem('koseiRPG',JSON.stringify(state));showText("教会に冒険の記録を残した！\nこれで安心して無茶できる。");}
@@ -213,18 +215,129 @@ function win(){state.g+=enemy.g;state.xp+=enemy.xp;let id=enemy.id,n=enemy.name,
 function levelCheck(){let out='';while(state.xp>=state.next&&state.lv<15){state.lv++;state.xp-=state.next;state.next=Math.floor(state.next*1.45);state.maxhp+=7;state.maxmp+=3;state.atk+=3;state.def+=2;state.hp=state.maxhp;state.mp=state.maxmp;out+=`\nレベル${state.lv}になった！`;let s=spells.find(q=>q.lv==state.lv);if(s)out+=`\n「${s.name}」を覚えた！`}return out}
 function die(){battle.style.display='none';mode='message';state.hp=state.maxhp;state.mp=state.maxmp;if(state.save){state.map=state.save.map;state.x=state.save.x;state.y=state.save.y}else{state.map='osaka';state.x=7;state.y=11}showText("こうせいは力尽きた……。\n最後に記録した教会から再出発！");}
 function bossDone(id){return id=='mat'?state.flags.boss1:id=='nishi'?state.flags.boss2:state.flags.final}
+function drawPerson(px,py,body='#d65b5b',hair='#2a1b12'){
+  // legs
+  ctx.fillStyle='#2b2b35';
+  ctx.fillRect(px+7,py+15,4,7);
+  ctx.fillRect(px+13,py+15,4,7);
+  // body
+  ctx.fillStyle=body;
+  ctx.fillRect(px+5,py+9,14,8);
+  // head
+  ctx.fillStyle='#f2c7a5';
+  ctx.fillRect(px+7,py+3,10,8);
+  // hair
+  ctx.fillStyle=hair;
+  ctx.fillRect(px+6,py+1,12,4);
+  ctx.fillRect(px+6,py+4,3,4);
+  ctx.fillRect(px+15,py+4,3,4);
+  // eyes
+  ctx.fillStyle='#222';
+  ctx.fillRect(px+9,py+6,2,1);
+  ctx.fillRect(px+14,py+6,2,1);
+}
 function render(){
- if(!state)return;ctx.fillStyle=maps[state.map].bg;ctx.fillRect(0,0,360,360);let m=maps[state.map];
- ctx.fillStyle='#202020';for(let r of(m.walls||[]))ctx.fillRect(r[0]*T,r[1]*T,r[2]*T,r[3]*T);
- for(let b of(m.buildings||[])){ctx.fillStyle='#7b4d32';ctx.fillRect(b.x*T,b.y*T,b.w*T,b.h*T);ctx.fillStyle='#eee';ctx.font='11px sans-serif';ctx.fillText(b.label,b.x*T+5,b.y*T+18)}
- for(let s of(m.spots||[])){ctx.fillStyle=s.locked?'#5b255d':'#765d35';ctx.fillRect(s.x*T,s.y*T,T,T);ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText(s.label,s.x*T-10,s.y*T-3)}
- for(let n of(m.npcs||[])){ctx.fillStyle='#f2c14e';ctx.fillRect(n.x*T+5,n.y*T+4,14,17)}
- for(let ch of(m.chests||[]))if(!state.chests[ch.id]){ctx.fillStyle='#d79b32';ctx.fillRect(ch.x*T+3,ch.y*T+7,18,13)}
- if(m.boss&&!bossDone(m.boss.id)){ctx.fillStyle=bosses[m.boss.id].color;ctx.fillRect(m.boss.x*T+3,m.boss.y*T+2,18,20)}
- ctx.fillStyle='#f4f4f4';ctx.fillRect(state.x*T+5,state.y*T+3,14,18);ctx.fillStyle='#2e66aa';ctx.fillRect(state.x*T+7,state.y*T+4,10,6);
+ if(!state)return;
+ ctx.fillStyle=maps[state.map].bg;
+ ctx.fillRect(0,0,360,360);
+ let m=maps[state.map];
+
+ // subtle ground grid for a more game-like map
+ ctx.strokeStyle='#00000012';
+ ctx.lineWidth=1;
+ for(let gx=0;gx<=360;gx+=T){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,360);ctx.stroke()}
+ for(let gy=0;gy<=360;gy+=T){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(360,gy);ctx.stroke()}
+
+ ctx.fillStyle='#202020';
+ for(let r of(m.walls||[]))ctx.fillRect(r[0]*T,r[1]*T,r[2]*T,r[3]*T);
+
+ for(let b of(m.buildings||[])){
+   ctx.fillStyle='#7b4d32';ctx.fillRect(b.x*T,b.y*T,b.w*T,b.h*T);
+   ctx.fillStyle='#9b6a49';ctx.fillRect(b.x*T+3,b.y*T+3,b.w*T-6,b.h*T-6);
+   ctx.fillStyle='#e9dfc8';ctx.fillRect((b.x+Math.floor(b.w/2))*T-7,(b.y+b.h)*T-12,14,12);
+   ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.fillText(b.label,b.x*T+5,b.y*T+18)
+ }
+
+ for(let s of(m.spots||[])){
+   ctx.fillStyle=s.locked?'#5b255d':'#765d35';
+   ctx.fillRect(s.x*T,s.y*T,T,T);
+   ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText(s.label,s.x*T-10,s.y*T-3)
+ }
+
+ // Make exits extremely obvious
+ if(m.exit){
+   ctx.fillStyle='#f6d64a';
+   ctx.fillRect(m.exit.x*T+2,m.exit.y*T+2,T-4,T-4);
+   ctx.fillStyle='#111';
+   ctx.font='bold 10px sans-serif';
+   ctx.fillText('出口',m.exit.x*T+2,m.exit.y*T+15);
+   ctx.fillStyle='#fff';
+   ctx.font='bold 18px sans-serif';
+   ctx.fillText('↓',m.exit.x*T+5,m.exit.y*T+33);
+ }
+
+ let npcColors=['#d75a5a','#4c86d9','#6aaf5c','#d89a45','#8a64c7'];
+ (m.npcs||[]).forEach((n,i)=>drawPerson(n.x*T,n.y*T,npcColors[i%npcColors.length],i%2?'#51351f':'#2b211b'));
+
+ for(let ch of(m.chests||[]))if(!state.chests[ch.id]){
+   ctx.fillStyle='#d79b32';ctx.fillRect(ch.x*T+3,ch.y*T+7,18,13);
+   ctx.fillStyle='#7a4b16';ctx.fillRect(ch.x*T+3,ch.y*T+12,18,3)
+ }
+
+ if(m.boss&&!bossDone(m.boss.id)){
+   ctx.fillStyle=bosses[m.boss.id].color;ctx.fillRect(m.boss.x*T+2,m.boss.y*T+2,20,20);
+   ctx.fillStyle='#fff';ctx.fillRect(m.boss.x*T+6,m.boss.y*T+6,3,3);ctx.fillRect(m.boss.x*T+15,m.boss.y*T+6,3,3)
+ }
+
+ // Hero also looks like a person
+ drawPerson(state.x*T,state.y*T,'#2e66aa','#1a1a1a');
+
+ // clear directional sign in towns
+ if(m.kind=='town'){
+   ctx.fillStyle='#ffffffdd';
+   ctx.fillRect(105,318,150,28);
+   ctx.fillStyle='#111';
+   ctx.font='bold 13px sans-serif';
+   ctx.fillText('↓ 黄色い「出口」へ進む',118,337);
+ }
+
  updateTop();
 }
-document.querySelectorAll('.dir').forEach(el=>{let f=()=>{let id=el.id;move(id=='left'?-1:id=='right'?1:0,id=='up'?-1:id=='down'?1:0,id)};el.addEventListener('pointerdown',e=>{e.preventDefault();f()})});
+const joystick=document.getElementById('joystick'), stick=document.getElementById('stick');
+let joyActive=false,joyTimer=null,lastJoyDir='';
+function resetStick(){stick.style.left='40px';stick.style.top='40px';lastJoyDir='';if(joyTimer){clearInterval(joyTimer);joyTimer=null}}
+function joyMoveFromEvent(e){
+  const r=joystick.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  let dx=e.clientX-cx, dy=e.clientY-cy;
+  const max=33, dist=Math.hypot(dx,dy)||1;
+  if(dist>max){dx=dx/dist*max;dy=dy/dist*max}
+  stick.style.left=(40+dx)+'px';stick.style.top=(40+dy)+'px';
+  let dir='';
+  if(Math.hypot(dx,dy)>12){
+    if(Math.abs(dx)>Math.abs(dy)) dir=dx>0?'right':'left';
+    else dir=dy>0?'down':'up';
+  }
+  if(dir && dir!==lastJoyDir){
+    lastJoyDir=dir;
+    if(dir==='left')move(-1,0,'left');
+    if(dir==='right')move(1,0,'right');
+    if(dir==='up')move(0,-1,'up');
+    if(dir==='down')move(0,1,'down');
+    if(joyTimer)clearInterval(joyTimer);
+    joyTimer=setInterval(()=>{
+      if(!joyActive||!lastJoyDir)return;
+      if(lastJoyDir==='left')move(-1,0,'left');
+      if(lastJoyDir==='right')move(1,0,'right');
+      if(lastJoyDir==='up')move(0,-1,'up');
+      if(lastJoyDir==='down')move(0,1,'down');
+    },150);
+  }
+}
+joystick.addEventListener('pointerdown',e=>{e.preventDefault();joyActive=true;joystick.setPointerCapture(e.pointerId);joyMoveFromEvent(e)});
+joystick.addEventListener('pointermove',e=>{if(joyActive){e.preventDefault();joyMoveFromEvent(e)}});
+joystick.addEventListener('pointerup',e=>{joyActive=false;resetStick()});
+joystick.addEventListener('pointercancel',e=>{joyActive=false;resetStick()});
 document.getElementById('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode=='message')closeMsg();else interact()});
 document.getElementById('menuBtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode=='map')openMenu();else if(mode=='menu')closePanels()});
 document.addEventListener('keydown',e=>{if(e.key=='ArrowUp')move(0,-1,'up');if(e.key=='ArrowDown')move(0,1,'down');if(e.key=='ArrowLeft')move(-1,0,'left');if(e.key=='ArrowRight')move(1,0,'right');if(e.key=='Enter'||e.key==' ')mode=='message'?closeMsg():interact();});
