@@ -2,20 +2,20 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#111">
 <title>勇者こうせいと大魔王タクソーン</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%}
+html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%;touch-action:none}
 #app,#gameWrap,#controls,#leftZone,#joyBase,.btn{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
 #app{height:100dvh;max-width:520px;margin:auto;display:flex;flex-direction:column;background:#171717}
 #top{height:48px;padding:8px 10px;background:#0d0d0d;border-bottom:2px solid #555;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px}
 #gameWrap{position:relative;flex:1;min-height:0;background:#000}
-canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none;-webkit-user-select:none;user-select:none}
 #controls{height:215px;position:relative;background:#202020;border-top:2px solid #555;overflow:hidden;touch-action:none;padding-bottom:env(safe-area-inset-bottom)}
 #leftZone{position:absolute;left:0;top:0;width:57%;height:100%;touch-action:none;z-index:5}
 #divider{position:absolute;left:57%;top:15px;bottom:15px;width:1px;background:#ffffff22}
@@ -566,6 +566,11 @@ leftZone.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gestureend',e=>e.preventDefault(),{passive:false});
+// iPhone Safari: keep the game viewport fixed during play.
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<=300)e.preventDefault();lastTouchEnd=now},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 
 document.getElementById('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='message')closeText();else if(mode==='map')interact()});
 document.getElementById('menuBtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='map')openMenu();else if(mode==='menu')closePanels()});
