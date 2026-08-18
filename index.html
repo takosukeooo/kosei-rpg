@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111">
+<title>勇者こうせいと大魔王タクソーン</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#111;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;overflow:hidden;height:100%}
+#app{height:100dvh;max-width:520px;margin:auto;display:flex;flex-direction:column;background:#181818}
+#top{height:46px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;background:#101010;border-bottom:2px solid #555;font-weight:700;font-size:13px}
+#gameWrap{position:relative;flex:1;min-height:0;background:#000}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+#msg{position:absolute;left:4%;right:4%;bottom:3%;background:#050505eF;border:3px solid #fff;border-radius:8px;padding:10px 12px;min-height:78px;font-weight:700;line-height:1.45;display:none;z-index:5}
+#controls{height:190px;position:relative;background:#202020;border-top:2px solid #555;padding-bottom:env(safe-area-inset-bottom)}
+.dpad{position:absolute;left:18px;top:12px;width:150px;height:150px}
+.btn{position:absolute;border:2px solid #aaa;background:#353535;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:none}
+.dir{width:50px;height:50px;border-radius:9px;font-size:23px}
+#up{left:50px;top:0}#left{left:0;top:50px}#right{left:100px;top:50px}#down{left:50px;top:100px}
+#abtn{right:25px;top:35px;width:68px;height:68px;border-radius:50%;background:#7b2020}
+#menuBtn{right:105px;top:95px;width:62px;height:44px;border-radius:10px;font-size:12px}
+.panel{position:absolute;inset:3%;background:#080808f5;border:3px solid #fff;border-radius:9px;padding:14px;z-index:10;overflow:auto;display:none}
+.panel h2{margin:0 0 10px;font-size:20px}.panel button,.choice{width:100%;padding:12px;margin:5px 0;border:2px solid #aaa;border-radius:7px;background:#252525;color:white;font-weight:800;font-size:15px}
+.row{display:flex;gap:7px}.row>*{flex:1}.small{font-size:12px;color:#ccc}
+#battleChoices{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#battleChoices button{padding:12px;background:#222;color:white;border:2px solid #aaa;border-radius:6px;font-weight:800}
+#title{position:absolute;inset:0;background:linear-gradient(#17294a,#080b12);z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px}
+#title h1{font-size:27px;line-height:1.3;margin:0 0 8px}#title p{color:#ddd}
+#title button{width:80%;padding:14px;margin:6px;border:2px solid white;border-radius:8px;background:#252525;color:#fff;font-size:17px;font-weight:900}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="top"><span id="place">オオサカ</span><span id="stats">Lv1 HP 30/30 MP 10/10 100G</span></div>
+<div id="gameWrap">
+<canvas id="game" width="360" height="360"></canvas>
+<div id="msg"></div>
+<div id="menu" class="panel"></div>
+<div id="battle" class="panel"></div>
+<div id="shop" class="panel"></div>
+<div id="title">
+<h1>勇者こうせいと<br>大魔王タクソーン</h1>
+<p>世界の命運は、だいたいこうせいに託された。</p>
+<button onclick="newGame()">はじめから</button>
+<button onclick="continueGame()">つづきから</button>
+</div>
+</div>
+<div id="controls">
+<div class="dpad">
+<div class="btn dir" id="up">▲</div><div class="btn dir" id="left">◀</div>
+<div class="btn dir" id="right">▶</div><div class="btn dir" id="down">▼</div>
+</div>
+<div class="btn" id="abtn">A</div><div class="btn" id="menuBtn">MENU</div>
+</div>
+</div>
+<script>
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+const msg=document.getElementById('msg'), menu=document.getElementById('menu'), battle=document.getElementById('battle'), shop=document.getElementById('shop');
+const W=15,H=15,T=24;
+let state,mode='map',lastDir='down',stepCount=0;
+
+const spells=[
+ {name:'屁',lv:1,mp:2,pow:8},{name:'静電気',lv:3,mp:4,pow:16},
+ {name:'ちょい波動',lv:6,mp:7,pow:28},{name:'ビッグバン',lv:9,mp:12,pow:48}
+];
+const swords=[
+ ['木っぽい剣',0,0],['銅の剣',80,4],['鉄の剣',180,8],['鋼の剣',350,13],['勇者っぽい剣',650,19],['伝説かもしれない剣',1000,26]
+];
+const heads=[['布の帽子',60,2],['鉄の兜',200,6],['勇者ヘルメット',500,11]];
+const bodies=[['旅人の服',0,0],['鉄の鎧',250,7],['勇者ジャケット',700,15]];
+const accs=[['なし',0,0],['根性のお守り',120,2],['謎の指輪',300,5],['タコ焼きチャーム',450,8],['上品なお守り',650,11]];
+const monsters={
+ slime:{name:'スライム',hp:12,atk:5,def:1,xp:5,g:7,color:'#4ac7e8'},
+ gob:{name:'ゴブリン',hp:20,atk:8,def:2,xp:9,g:12,color:'#70b94c'},
+ hob:{name:'ホブゴブリン',hp:30,atk:11,def:4,xp:15,g:20,color:'#c59b45'},
+ toku:{name:'トクレン',hp:40,atk:14,def:6,xp:24,g:32,color:'#d85a5a'},
+ riri:{name:'リリポン',hp:48,atk:16,def:7,xp:30,g:40,color:'#c55bd5'}
+};
+const bosses={
+ mat:{name:'まっちゃん',hp:75,atk:12,def:4,xp:55,g:100,color:'#e27a3f'},
+ nishi:{name:'ニシ',hp:120,atk:17,def:7,xp:90,g:180,color:'#6f78e8'},
+ taku:{name:'大魔王タクソーン',hp:230,atk:23,def:10,xp:0,g:0,color:'#8d2bb5'}
+};
+function baseState(){return {map:'osaka',x:7,y:11,lv:1,xp:0,next:18,hp:30,maxhp:30,mp:10,maxmp:10,atk:7,def:3,g:100,
+ items:{herb:2,water:1,warp:0},eq:{sword:0,head:0,body:0,acc:0},
+ flags:{quest1:false,boss1:false,quest2:false,boss2:false,final:false},
+ chests:{},save:null};}
+const maps={
+ osaka:{name:'オオサカ',kind:'town',bg:'#b7c47a',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],
+ buildings:[
+  {x:1,y:1,w:4,h:3,label:'武器',type:'weapon'},
+  {x:6,y:1,w:3,h:3,label:'防具',type:'armor'},
+  {x:10,y:1,w:4,h:3,label:'宿',type:'inn'},
+  {x:1,y:6,w:4,h:3,label:'教会',type:'church'},
+  {x:10,y:6,w:4,h:3,label:'道具',type:'item'}
+ ],npcs:[
+  {x:7,y:6,t:"兄ちゃんが勇者こうせいか？\nえらいシュッとしてるやん。知らんけど。"},
+  {x:6,y:9,t:"大魔王タクソーン？そら強いやろ。\n名前に『大』ついとるし。"},
+  {x:10,y:11,t:"洞窟のまっちゃん倒してきてや！",quest:1},
+  {x:3,y:11,t:"重要なヒント欲しい？\nワシも欲しいわ。"}
+ ],exit:{x:7,y:14,to:'field',tx:3,ty:12}},
+ kyoto:{name:'キョウト',kind:'town',bg:'#c6b98d',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],
+ buildings:[
+  {x:1,y:1,w:4,h:3,label:'武器',type:'weapon'},
+  {x:6,y:1,w:3,h:3,label:'防具',type:'armor'},
+  {x:10,y:1,w:4,h:3,label:'宿',type:'inn'},
+  {x:1,y:6,w:4,h:3,label:'教会',type:'church'},
+  {x:10,y:6,w:4,h:3,label:'道具',type:'item'}
+ ],npcs:[
+  {x:7,y:6,t:"まあ勇者様。\nずいぶん親しみやすい装備どすなぁ。"},
+  {x:5,y:10,t:"洞窟で迷わはったら大変どすなぁ。\nまあ、あの程度なら迷わへんと思いますけど。"},
+  {x:10,y:11,t:"ニシはんを倒していただけると助かります。\n勇者様なら当然できますやろ？",quest:2},
+  {x:3,y:11,t:"お疲れの顔してはりますなぁ。\n宿屋という便利な建物、ご存じどす？"}
+ ],exit:{x:7,y:14,to:'field',tx:11,ty:12}},
+ field:{name:'ワールドマップ',kind:'field',bg:'#4f9a4f',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],
+ spots:[
+  {x:3,y:13,to:'osaka',tx:7,ty:13,label:'オオサカ'},
+  {x:3,y:5,to:'cave1',tx:7,ty:13,label:'洞窟①'},
+  {x:11,y:13,to:'kyoto',tx:7,ty:13,label:'キョウト'},
+  {x:11,y:5,to:'cave2',tx:7,ty:13,label:'洞窟②'},
+  {x:7,y:2,to:'castle',tx:7,ty:11,label:'魔王の屋敷',locked:true}
+ ]},
+ cave1:{name:'まっちゃんの洞窟',kind:'dungeon',bg:'#39353a',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15],[3,3,8,1],[3,7,1,5],[7,5,1,6],[10,7,1,5]],
+ exit:{x:7,y:14,to:'field',tx:3,ty:6},boss:{x:7,y:1,id:'mat'},chests:[{x:2,y:5,id:'c1a',g:80},{x:12,y:9,id:'c1b',item:'herb'},{x:5,y:12,id:'c1c',equip:['sword',2]}]},
+ cave2:{name:'ニシの洞窟',kind:'dungeon',bg:'#313945',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15],[2,3,10,1],[4,6,1,6],[8,5,1,7],[11,7,1,5]],
+ exit:{x:7,y:14,to:'field',tx:11,ty:6},boss:{x:7,y:1,id:'nishi'},chests:[{x:12,y:5,id:'c2a',g:160},{x:2,y:10,id:'c2b',item:'water'},{x:6,y:12,id:'c2c',equip:['body',2]}]},
+ castle:{name:'大魔王の屋敷',kind:'castle',bg:'#321d38',walls:[[0,0,15,1],[0,14,15,1],[0,0,1,15],[14,0,1,15]],boss:{x:7,y:4,id:'taku'},exit:{x:7,y:14,to:'field',tx:7,ty:3}}
+};
+function newGame(){state=baseState();document.getElementById('title').style.display='none';showText("世界は大魔王タクソーンに支配されようとしていた！\nなぜか勇者に選ばれたこうせいは、一人で旅立った！",()=>{state.flags.quest1=true});render();}
+function continueGame(){let s=localStorage.getItem('koseiRPG');if(!s){showTitleMsg('セーブデータがない！');return} state=JSON.parse(s);document.getElementById('title').style.display='none';render();}
+function showTitleMsg(t){alert(t)}
+function saveGame(){state.save={map:state.map,x:state.x,y:state.y};localStorage.setItem('koseiRPG',JSON.stringify(state));showText("教会に冒険の記録を残した！\nこれで安心して無茶できる。");}
+function calcAtk(){return state.atk+swords[state.eq.sword][2]}
+function calcDef(){return state.def+heads[state.eq.head][2]+bodies[state.eq.body][2]+accs[state.eq.acc][2]}
+function updateTop(){document.getElementById('place').textContent=maps[state.map].name;document.getElementById('stats').textContent=`Lv${state.lv} HP ${state.hp}/${state.maxhp} MP ${state.mp}/${state.maxmp} ${state.g}G`;}
+function rectHit(x,y,r){return x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3]}
+function blocked(x,y){
+ let m=maps[state.map]; if(x<0||y<0||x>=W||y>=H)return true;
+ if((m.walls||[]).some(r=>rectHit(x,y,r)))return true;
+ if((m.buildings||[]).some(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h))return true;
+ if((m.npcs||[]).some(n=>n.x==x&&n.y==y))return true;
+ if((m.chests||[]).some(ch=>ch.x==x&&ch.y==y&&!state.chests[ch.id]))return true;
+ if(m.boss && x==m.boss.x&&y==m.boss.y && !bossDone(m.boss.id))return true;
+ return false;
+}
+function move(dx,dy,dir){if(mode!='map')return;lastDir=dir;let nx=state.x+dx,ny=state.y+dy;if(!blocked(nx,ny)){state.x=nx;state.y=ny;stepCount++;checkTransition(); if(mode=='map'&&(maps[state.map].kind=='field'||maps[state.map].kind=='dungeon')&&Math.random()<0.105&&stepCount>2){stepCount=0;randomBattle();}}render();}
+function checkTransition(){
+ let m=maps[state.map];
+ if(m.exit&&state.x==m.exit.x&&state.y==m.exit.y){go(m.exit.to,m.exit.tx,m.exit.ty);return}
+ for(let s of (m.spots||[])) if(state.x==s.x&&state.y==s.y){if(s.locked&&!(state.flags.boss1&&state.flags.boss2)){showText("不思議な結界に阻まれた。\n二つの証が必要らしい。");return}else go(s.to,s.tx,s.ty)}
+}
+function go(to,x,y){state.map=to;state.x=x;state.y=y;stepCount=0;if(to=='castle'&&!state.flags.final)showText("二つの証が光る！\n大魔王タクソーンの屋敷へ入った！");}
+function front(){let d={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[lastDir];return[state.x+d[0],state.y+d[1]]}
+function interact(){
+ if(mode!='map')return;let [x,y]=front(),m=maps[state.map];
+ let n=(m.npcs||[]).find(n=>n.x==x&&n.y==y);if(n){if(n.quest==1)state.flags.quest1=true;if(n.quest==2)state.flags.quest2=true;showText(n.t);return}
+ let b=(m.buildings||[]).find(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h);if(b){building(b.type);return}
+ let ch=(m.chests||[]).find(q=>q.x==x&&q.y==y&&!state.chests[q.id]);if(ch){openChest(ch);return}
+ if(m.boss&&m.boss.x==x&&m.boss.y==y&&!bossDone(m.boss.id)){startBattle(m.boss.id,true);return}
+ showText("特に何もない。\nこうせいはちょっと気まずくなった。");
+}
+function building(type){
+ if(type=='church'){showText("神父「記録しとく？ 世界救うんやろ？」",()=>saveGame());return}
+ if(type=='inn'){let cost=20;if(state.g>=cost){state.g-=cost;state.hp=state.maxhp;state.mp=state.maxmp;showText(`宿屋で休んだ！ ${cost}G払った。\nHPとMPが全回復した。`)}else showText("宿屋「お金足りませんえ。」");return}
+ if(type=='weapon')openShop('weapon'); else if(type=='armor')openShop('armor'); else openShop('item');
+}
+function openChest(ch){state.chests[ch.id]=true;if(ch.g){state.g+=ch.g;showText(`宝箱から ${ch.g}G 手に入れた！`)}
+ else if(ch.item){state.items[ch.item]++;showText(`宝箱から ${itemName(ch.item)} を手に入れた！`)}
+ else if(ch.equip){let [k,i]=ch.equip;state.eq[k]=i;showText(`宝箱から ${equipName(k,i)}！\nこうせいはその場で装備した！`)}}
+function itemName(k){return {herb:'薬草',water:'聖水',warp:'ワープマン'}[k]}
+function equipName(k,i){return {sword:swords,head:heads,body:bodies,acc:accs}[k][i][0]}
+function openShop(kind){mode='shop';shop.style.display='block';let arr=kind=='weapon'?swords.slice(1):kind=='armor'?[...heads,...bodies,...accs.slice(1)]:[['薬草',15,'herb'],['聖水',25,'water'],['ワープマン',40,'warp']];
+ shop.innerHTML=`<h2>${kind=='weapon'?'武器屋':kind=='armor'?'防具屋':'道具屋'}</h2><div class=small>所持金 ${state.g}G</div>`+
+ arr.map((it,idx)=>`<button onclick="buy('${kind}',${idx})">${it[0]}　${it[1]}G${kind!='item'?'　強さ+'+it[2]:''}</button>`).join('')+`<button onclick="closePanels()">やめる</button>`}
+function buy(kind,idx){
+ let it,slot,real;
+ if(kind=='weapon'){real=idx+1;it=swords[real];slot='sword'}
+ else if(kind=='armor'){let all=[...heads.map((x,i)=>[x,'head',i]),...bodies.map((x,i)=>[x,'body',i]),...accs.slice(1).map((x,i)=>[x,'acc',i+1])];[it,slot,real]=all[idx]}
+ else {let all=[['薬草',15,'herb'],['聖水',25,'water'],['ワープマン',40,'warp']];it=all[idx]}
+ if(state.g<it[1]){showText("お金が足りない！");return}
+ state.g-=it[1];if(kind=='item')state.items[it[2]]++;else state.eq[slot]=real;updateTop();openShop(kind)
+}
+function closePanels(){menu.style.display=battle.style.display=shop.style.display='none';mode='map';render()}
+function showText(t,cb){mode='message';msg.innerHTML=t.replace(/\n/g,'<br>')+"<div class='small'>Aで閉じる</div>";msg.style.display='block';msg._cb=cb||null}
+function closeMsg(){if(mode!='message')return;msg.style.display='none';let cb=msg._cb;msg._cb=null;mode='map';if(cb)cb();render()}
+function openMenu(){if(mode!='map')return;mode='menu';menu.style.display='block';let objective=!state.flags.boss1?'洞窟①のまっちゃんを倒す':!state.flags.boss2?'キョウト方面の洞窟②でニシを倒す':!state.flags.final?'大魔王タクソーンの屋敷へ向かう':'世界は救われた！';
+ menu.innerHTML=`<h2>こうせい</h2><p>Lv ${state.lv}　EXP ${state.xp}/${state.next}<br>HP ${state.hp}/${state.maxhp}　MP ${state.mp}/${state.maxmp}<br>攻撃 ${calcAtk()}　防御 ${calcDef()}　${state.g}G</p>
+ <p class=small>目的：${objective}</p>
+ <p>武器：${swords[state.eq.sword][0]}<br>頭：${heads[state.eq.head][0]}<br>胴：${bodies[state.eq.body][0]}<br>アクセ：${accs[state.eq.acc][0]}</p>
+ <p>薬草×${state.items.herb}　聖水×${state.items.water}　ワープマン×${state.items.warp}</p>
+ <button onclick="fieldItem('herb')">薬草を使う</button><button onclick="fieldItem('water')">聖水を使う</button><button onclick="fieldItem('warp')">ワープマンを使う</button><button onclick="closePanels()">閉じる</button>`}
+function fieldItem(k){if(!state.items[k])return;if(k=='herb'){state.items[k]--;state.hp=Math.min(state.maxhp,state.hp+25)}
+ if(k=='water'){state.items[k]--;state.mp=Math.min(state.maxmp,state.mp+12)}
+ if(k=='warp'){if(maps[state.map].kind!='dungeon')return;state.items[k]--;go('field',state.map=='cave1'?3:11,6)}
+ closePanels();}
+function randomBattle(){let pool=state.map=='cave1'?['slime','gob','hob']:state.map=='cave2'?['hob','toku','riri']:state.flags.boss1?['gob','hob','toku']:['slime','gob'];startBattle(pool[Math.floor(Math.random()*pool.length)],false)}
+let enemy=null,bossFight=false;
+function startBattle(id,isBoss){mode='battle';bossFight=isBoss;let src=isBoss?bosses[id]:monsters[id];enemy={...src,id,maxhp:src.hp};battle.style.display='block';battleRender(`${enemy.name}が あらわれた！`)}
+function battleRender(text='どうする？'){battle.innerHTML=`<h2>${enemy.name}</h2><p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${text}</p><div id=battleChoices><button onclick="attack()">たたかう</button><button onclick="spellMenu()">じゅもん</button><button onclick="battleItemMenu()">どうぐ</button><button onclick="runAway()">にげる</button></div>`}
+function attack(){let dmg=Math.max(1,calcAtk()+Math.floor(Math.random()*5)-enemy.def);enemy.hp-=dmg;if(enemy.hp<=0)return win();enemyTurn(`こうせいの攻撃！ ${dmg}ダメージ！`)}
+function spellMenu(){let known=spells.filter(s=>state.lv>=s.lv);battle.innerHTML=`<h2>じゅもん</h2>`+known.map((s,i)=>`<button onclick="cast(${i})">${s.name}　MP${s.mp}</button>`).join('')+`<button onclick="battleRender()">戻る</button>`}
+function cast(i){let s=spells.filter(s=>state.lv>=s.lv)[i];if(state.mp<s.mp){battleRender("MPが足りない！");return}state.mp-=s.mp;let dmg=s.pow+Math.floor(Math.random()*6)+state.lv-enemy.def/2|0;enemy.hp-=dmg;if(enemy.hp<=0)return win();enemyTurn(`${s.name}！ ${dmg}ダメージ！`)}
+function battleItemMenu(){battle.innerHTML=`<h2>どうぐ</h2><button onclick="battleUse('herb')">薬草 ×${state.items.herb}</button><button onclick="battleUse('water')">聖水 ×${state.items.water}</button><button onclick="battleRender()">戻る</button>`}
+function battleUse(k){if(!state.items[k]){battleRender("持っていない！");return}state.items[k]--;if(k=='herb')state.hp=Math.min(state.maxhp,state.hp+25);else state.mp=Math.min(state.maxmp,state.mp+12);enemyTurn(`${itemName(k)}を使った！`)}
+function enemyTurn(prefix){let dmg=Math.max(1,enemy.atk+Math.floor(Math.random()*5)-calcDef());state.hp-=dmg;updateTop();if(state.hp<=0)return die();battleRender(`${prefix}<br>${enemy.name}の攻撃！ ${dmg}ダメージ！`)}
+function runAway(){if(bossFight){battleRender("ボス戦からは逃げられない！");return}if(Math.random()<.75){closePanels();showText("うまく逃げ切った！")}else enemyTurn("しかし回り込まれた！")}
+function win(){state.g+=enemy.g;state.xp+=enemy.xp;let id=enemy.id,n=enemy.name,g=enemy.g,x=enemy.xp;closePanels();
+ if(bossFight){if(id=='mat')state.flags.boss1=true;if(id=='nishi')state.flags.boss2=true;if(id=='taku')state.flags.final=true}
+ let lvmsg=levelCheck();let extra=id=='mat'?"\n第一の証を手に入れた！":id=='nishi'?"\n第二の証を手に入れた！\n二つの証が共鳴した！ 魔王の屋敷の結界が消えた！":id=='taku'?"\n\n大魔王タクソーンは倒れた！\n世界に平和が戻った！\n\n― おしまい ―":"";
+ showText(`${n}を倒した！\n${x}EXP と ${g}G を手に入れた！${lvmsg}${extra}`)}
+function levelCheck(){let out='';while(state.xp>=state.next&&state.lv<15){state.lv++;state.xp-=state.next;state.next=Math.floor(state.next*1.45);state.maxhp+=7;state.maxmp+=3;state.atk+=3;state.def+=2;state.hp=state.maxhp;state.mp=state.maxmp;out+=`\nレベル${state.lv}になった！`;let s=spells.find(q=>q.lv==state.lv);if(s)out+=`\n「${s.name}」を覚えた！`}return out}
+function die(){battle.style.display='none';mode='message';state.hp=state.maxhp;state.mp=state.maxmp;if(state.save){state.map=state.save.map;state.x=state.save.x;state.y=state.save.y}else{state.map='osaka';state.x=7;state.y=11}showText("こうせいは力尽きた……。\n最後に記録した教会から再出発！");}
+function bossDone(id){return id=='mat'?state.flags.boss1:id=='nishi'?state.flags.boss2:state.flags.final}
+function render(){
+ if(!state)return;ctx.fillStyle=maps[state.map].bg;ctx.fillRect(0,0,360,360);let m=maps[state.map];
+ ctx.fillStyle='#202020';for(let r of(m.walls||[]))ctx.fillRect(r[0]*T,r[1]*T,r[2]*T,r[3]*T);
+ for(let b of(m.buildings||[])){ctx.fillStyle='#7b4d32';ctx.fillRect(b.x*T,b.y*T,b.w*T,b.h*T);ctx.fillStyle='#eee';ctx.font='11px sans-serif';ctx.fillText(b.label,b.x*T+5,b.y*T+18)}
+ for(let s of(m.spots||[])){ctx.fillStyle=s.locked?'#5b255d':'#765d35';ctx.fillRect(s.x*T,s.y*T,T,T);ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText(s.label,s.x*T-10,s.y*T-3)}
+ for(let n of(m.npcs||[])){ctx.fillStyle='#f2c14e';ctx.fillRect(n.x*T+5,n.y*T+4,14,17)}
+ for(let ch of(m.chests||[]))if(!state.chests[ch.id]){ctx.fillStyle='#d79b32';ctx.fillRect(ch.x*T+3,ch.y*T+7,18,13)}
+ if(m.boss&&!bossDone(m.boss.id)){ctx.fillStyle=bosses[m.boss.id].color;ctx.fillRect(m.boss.x*T+3,m.boss.y*T+2,18,20)}
+ ctx.fillStyle='#f4f4f4';ctx.fillRect(state.x*T+5,state.y*T+3,14,18);ctx.fillStyle='#2e66aa';ctx.fillRect(state.x*T+7,state.y*T+4,10,6);
+ updateTop();
+}
+document.querySelectorAll('.dir').forEach(el=>{let f=()=>{let id=el.id;move(id=='left'?-1:id=='right'?1:0,id=='up'?-1:id=='down'?1:0,id)};el.addEventListener('pointerdown',e=>{e.preventDefault();f()})});
+document.getElementById('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode=='message')closeMsg();else interact()});
+document.getElementById('menuBtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode=='map')openMenu();else if(mode=='menu')closePanels()});
+document.addEventListener('keydown',e=>{if(e.key=='ArrowUp')move(0,-1,'up');if(e.key=='ArrowDown')move(0,1,'down');if(e.key=='ArrowLeft')move(-1,0,'left');if(e.key=='ArrowRight')move(1,0,'right');if(e.key=='Enter'||e.key==' ')mode=='message'?closeMsg():interact();});
+render();
+</script>
+</body>
+</html>
