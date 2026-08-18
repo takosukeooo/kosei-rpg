@@ -50,7 +50,7 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
     <div id="title">
       <h1>勇者こうせいと<br>大魔王タクソーン</h1>
       <p>世界の命運は、だいたいこうせいに託された。</p>
-      <div class="ver">再構築版 v5・操作性改善</div>
+      <div class="ver">再構築版 v6・ボス演出強化</div>
       <button onclick="newGame()">はじめから</button>
       <button onclick="continueGame()">つづきから</button>
     </div>
@@ -67,7 +67,7 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 
 <script>
 const SAVE_KEY='koseiRPG_v4'; // v5でも既存セーブを引き継ぐ
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const canvas=document.getElementById('game');let ctx=canvas.getContext('2d');
 const msg=document.getElementById('msg'),menu=document.getElementById('menu'),battle=document.getElementById('battle'),shop=document.getElementById('shop'),title=document.getElementById('title');
 const T=24,W=15,H=15;
 ctx.imageSmoothingEnabled=false;
@@ -84,16 +84,17 @@ const bodies=[['旅人の服',0,0],['鉄の鎧',250,7],['勇者ジャケット',
 const accs=[['なし',0,0],['根性のお守り',120,2],['謎の指輪',300,5],['タコ焼きチャーム',450,8],['上品なお守り',650,11]];
 
 const monsters={
- slime:{name:'スライム',hp:12,atk:3,def:1,xp:5,g:7,color:'#49c6e5'},
- gob:{name:'ゴブリン',hp:20,atk:5,def:2,xp:9,g:12,color:'#6fac4d'},
- hob:{name:'ホブゴブリン',hp:30,atk:7,def:4,xp:15,g:20,color:'#c49b43'},
- toku:{name:'トクレン',hp:40,atk:10,def:6,xp:24,g:32,color:'#d65a5a'},
- riri:{name:'リリポン',hp:48,atk:12,def:7,xp:30,g:40,color:'#c25bd0'}
+ slime:{name:'スライム',hp:12,atk:3,def:1,xp:5,g:12,color:'#49c6e5'},
+ gob:{name:'ゴブリン',hp:20,atk:5,def:2,xp:9,g:20,color:'#6fac4d'},
+ hob:{name:'ホブゴブリン',hp:30,atk:7,def:4,xp:15,g:32,color:'#c49b43'},
+ toku:{name:'トクレン',hp:40,atk:10,def:6,xp:24,g:50,color:'#d65a5a'},
+ riri:{name:'リリポン',hp:48,atk:12,def:7,xp:30,g:65,color:'#c25bd0'}
 };
 const bosses={
- mat:{name:'まっちゃん',hp:75,atk:8,def:4,xp:55,g:100,color:'#e27a3f'},
- nishi:{name:'ニシ',hp:120,atk:17,def:7,xp:90,g:180,color:'#6f78e8'},
- taku:{name:'大魔王タクソーン',hp:230,atk:23,def:10,xp:0,g:0,color:'#8d2bb5'}
+ mat:{name:'まっちゃん',hp:75,atk:8,def:4,xp:55,g:150,color:'#e27a3f'},
+ nishi:{name:'ニシ',hp:120,atk:17,def:7,xp:90,g:300,color:'#6f78e8'},
+ taku:{name:'大魔王タクソーン',hp:230,atk:20,def:10,xp:0,g:0,color:'#8d2bb5'},
+ taku2:{name:'大魔王タクソーン・真の姿',hp:300,atk:23,def:12,xp:0,g:0,color:'#d02f91'}
 };
 
 const maps={
@@ -259,7 +260,13 @@ function interact(){
  if(b){building(b.type);return}
  const c=(m.chests||[]).find(c=>c.x===x&&c.y===y&&!state.chests[c.id]);
  if(c){openChest(c);return}
- if(m.boss&&m.boss.x===x&&m.boss.y===y&&!bossDone(m.boss.id)){startBattle(m.boss.id,true);return}
+ if(m.boss&&m.boss.x===x&&m.boss.y===y&&!bossDone(m.boss.id)){
+   if(m.boss.id==='mat'){showText("まっちゃん「僕は悪いまっちゃんじゃないよ……なんちゃって」",()=>startBattle('mat',true));return}
+   if(m.boss.id==='nishi'){showText("ニシ「もっとレベル上げろよ！」",()=>startBattle('nishi',true));return}
+   if(m.boss.id==='taku'){
+     showText("タクソーン「……来たか、勇者こうせい。\n貴様がここまで来ることは……最初から分かっていた。\n…………いや、嘘だ。\n洞窟のまっちゃん辺りで普通に死ぬと思ってた。\n\nうるさい！！ここまで来た褒美だ。大魔王であるこの俺が直々に相手をしてやる！\n来い、こうせい！！世界の命運ごとぶつけてこい！！」",()=>startBattle('taku',true));return
+   }
+ }
  showText("特に何もない。\\nこうせいはちょっと気まずくなった。");
 }
 function building(type){
@@ -341,7 +348,12 @@ function randomBattle(){
 function startBattle(id,boss){
  mode='battle';bossFight=boss;const src=boss?bosses[id]:monsters[id];enemy={...src,id,maxhp:src.hp};battle.style.display='block';battleUI(`${enemy.name}が あらわれた！`);
 }
-function battleUI(t='どうする？'){battle.innerHTML=`<h2>${enemy.name}</h2><p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${t}</p><button onclick="attack()">たたかう</button><button onclick="spellMenu()">じゅもん</button><button onclick="battleItems()">どうぐ</button><button onclick="runAway()">にげる</button>`}
+function battleUI(t='どうする？'){
+ battle.innerHTML=`<h2>${enemy.name}</h2>${bossFight?'<canvas id="bossPortrait" width="360" height="210" style="width:100%;height:auto;background:#130f18;border:2px solid #555"></canvas>':''}<p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${t}</p><button onclick="attack()">たたかう</button><button onclick="spellMenu()">じゅもん</button><button onclick="battleItems()">どうぐ</button><button onclick="runAway()">にげる</button>`;
+ if(bossFight){const bc=document.getElementById('bossPortrait'),oldctx=ctx;const bctx=bc.getContext('2d');const saveCanvas=canvas; // render portrait with temporary global ctx
+   const temp=ctx;ctx=bctx;bctx.imageSmoothingEnabled=false;bctx.clearRect(0,0,360,210);battleBossArt(enemy.id);ctx=temp;
+ }
+}
 function attack(){const d=Math.max(1,calcAtk()+Math.floor(Math.random()*5)-enemy.def);enemy.hp-=d;if(enemy.hp<=0)return win();enemyTurn(`こうせいの攻撃！ ${d}ダメージ！`)}
 function spellMenu(){battle._sp=spells.filter(s=>state.lv>=s.lv);battle.innerHTML=`<h2>じゅもん</h2>`+battle._sp.map((s,i)=>`<button onclick="cast(${i})">${s.name}　MP${s.mp}</button>`).join('')+`<button onclick="battleUI()">戻る</button>`}
 function cast(i){const s=battle._sp[i];if(state.mp<s.mp){battleUI("MPが足りない！");return}state.mp-=s.mp;const d=Math.max(1,Math.floor(s.pow+Math.random()*6+state.lv-enemy.def/2));enemy.hp-=d;if(enemy.hp<=0)return win();enemyTurn(`${s.name}！ ${d}ダメージ！`)}
@@ -350,13 +362,24 @@ function bUse(k){if(state.items[k]<=0){battleUI("持っていない！");return}
 function enemyTurn(prefix){const d=Math.max(1,enemy.atk+Math.floor(Math.random()*5)-calcDef());state.hp-=d;updateTop();if(state.hp<=0)return die();battleUI(`${prefix}<br>${enemy.name}の攻撃！ ${d}ダメージ！`)}
 function runAway(){if(bossFight){battleUI("ボス戦からは逃げられない！");return}if(Math.random()<0.8){closePanels();showText("うまく逃げ切った！")}else enemyTurn("しかし回り込まれた！")}
 function win(){
- const id=enemy.id,name=enemy.name,xp=enemy.xp,g=enemy.g;state.g+=g;state.xp+=xp;
- if(bossFight){if(id==='mat')state.flags.boss1=true;if(id==='nishi')state.flags.boss2=true;if(id==='taku')state.flags.final=true}
+ const id=enemy.id,name=enemy.name,xp=enemy.xp,g=enemy.g;
+ // First Takuson form: do NOT mark final complete. Transition to true form after dialogue.
+ if(id==='taku'){
+   battle.style.display='none';mode='map';updateTop();
+   showText("こうせい「……終わったのか？」\n\nタクソーン「…………ククク……。\nまさか、この姿を使うことになるとはな。\n勇者こうせい……褒めてやる。\nだが――ここからが本当の大魔王戦だ。\n来い！！これが最後だ！！」",()=>startBattle('taku2',true));
+   return;
+ }
+ state.g+=g;state.xp+=xp;
+ if(bossFight){
+   if(id==='mat')state.flags.boss1=true;
+   if(id==='nishi')state.flags.boss2=true;
+   if(id==='taku2')state.flags.final=true;
+ }
  battle.style.display='none';mode='map';
- let text=`${name}を倒した！\\n${xp}EXP と ${g}G を手に入れた！${levelUp()}`;
- if(id==='mat')text+="\\n第一の証を手に入れた！";
- if(id==='nishi')text+="\\n第二の証を手に入れた！\\n魔王の屋敷の結界が消えた！";
- if(id==='taku')text+="\\n\\n大魔王タクソーンは倒れた！\\n世界に平和が戻った！\\n\\n― おしまい ―";
+ let text=`${name}を倒した！\n${xp}EXP と ${g}G を手に入れた！${levelUp()}`;
+ if(id==='mat')text+="\n第一の証を手に入れた！";
+ if(id==='nishi')text+="\n第二の証を手に入れた！\n魔王の屋敷の結界が消えた！";
+ if(id==='taku2')text="大魔王タクソーン・真の姿を倒した！\n\nタクソーン「……見事だ、こうせい……。」\n\n世界に平和が戻った！\n\n― おしまい ―";
  showText(text);updateTop();
 }
 function levelUp(){let o='';while(state.xp>=state.next&&state.lv<15){state.xp-=state.next;state.lv++;state.next=Math.floor(state.next*1.45);state.maxhp+=7;state.maxmp+=3;state.atk+=3;state.def+=2;state.hp=state.maxhp;state.mp=state.maxmp;o+=`\\nレベル${state.lv}になった！`;const s=spells.find(s=>s.lv===state.lv);if(s)o+=`\\n「${s.name}」を覚えた！`}return o}
@@ -405,7 +428,66 @@ function dungeonDecor(m){
  if(m.kind!=='dungeon')return;
  for(const [tx,ty] of [[2,2],[12,4],[5,9],[9,12]]){ctx.fillStyle='#6f4a2c';ctx.fillRect(tx*T+10,ty*T+10,3,10);ctx.fillStyle='#ffcb54';ctx.beginPath();ctx.arc(tx*T+11,ty*T+7,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff7a32';ctx.beginPath();ctx.arc(tx*T+11,ty*T+8,3,0,Math.PI*2);ctx.fill()}
 }
-function monsterArt(x,y,c,big=false){ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(x+12,y+22,big?12:9,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+12,y+11,big?10:8,0,Math.PI*2);ctx.fill();ctx.fillRect(x+(big?4:6),y+11,big?16:12,big?10:8);ctx.fillStyle='#fff';ctx.fillRect(x+8,y+8,3,3);ctx.fillRect(x+15,y+8,3,3)}
+function monsterArt(x,y,c,big=false){
+ ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(x+12,y+22,big?12:9,4,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+12,y+11,big?10:8,0,Math.PI*2);ctx.fill();ctx.fillRect(x+(big?4:6),y+11,big?16:12,big?10:8);
+ ctx.fillStyle='#fff';ctx.fillRect(x+8,y+8,3,3);ctx.fillRect(x+15,y+8,3,3)
+}
+function bossMapArt(id,x,y){
+ const px=x*T,py=y*T;
+ if(id==='mat'){
+   ctx.fillStyle='#0006';ctx.beginPath();ctx.ellipse(px+12,py+22,13,4,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#7b2525';ctx.fillRect(px+2,py+9,20,13);
+   ctx.fillStyle='#d7a45e';ctx.fillRect(px+5,py+3,14,9);
+   ctx.fillStyle='#4a261d';ctx.fillRect(px+3,py+1,18,5);
+   ctx.fillStyle='#eee';ctx.fillRect(px+7,py+6,3,2);ctx.fillRect(px+15,py+6,3,2);
+   ctx.fillStyle='#c9c9c9';ctx.fillRect(px+20,py+5,3,17);ctx.fillStyle='#ead36a';ctx.fillRect(px+17,py+13,8,3);
+ } else if(id==='nishi'){
+   ctx.fillStyle='#0006';ctx.beginPath();ctx.ellipse(px+12,py+22,14,4,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#252d55';ctx.fillRect(px+1,py+8,22,14);ctx.fillStyle='#6f78e8';ctx.fillRect(px+4,py+9,16,10);
+   ctx.fillStyle='#efc5a3';ctx.fillRect(px+6,py+2,12,9);ctx.fillStyle='#181b28';ctx.fillRect(px+4,py,16,5);
+   ctx.fillStyle='#fff';ctx.fillRect(px+8,py+5,3,2);ctx.fillRect(px+15,py+5,3,2);
+   ctx.fillStyle='#d7dce5';ctx.fillRect(px-2,py+3,4,20);ctx.fillStyle='#b49a42';ctx.fillRect(px-5,py+14,10,3);
+ } else {
+   // Takuson on the throne map: largest and most ornate map boss.
+   ctx.fillStyle='#170d20';ctx.beginPath();ctx.ellipse(px+12,py+23,17,5,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#351044';ctx.fillRect(px-3,py+8,30,15);
+   ctx.fillStyle='#76278d';ctx.beginPath();ctx.moveTo(px+1,py+8);ctx.lineTo(px-5,py+22);ctx.lineTo(px+8,py+18);ctx.fill();
+   ctx.beginPath();ctx.moveTo(px+23,py+8);ctx.lineTo(px+29,py+22);ctx.lineTo(px+16,py+18);ctx.fill();
+   ctx.fillStyle='#1d1522';ctx.fillRect(px+5,py+5,14,15);
+   ctx.fillStyle='#b83745';ctx.fillRect(px+8,py+8,3,2);ctx.fillRect(px+15,py+8,3,2);
+   ctx.fillStyle='#d6b348';ctx.fillRect(px+5,py+2,14,3);ctx.fillRect(px+6,py-2,3,5);ctx.fillRect(px+11,py-4,3,7);ctx.fillRect(px+16,py-2,3,5);
+ }
+}
+function battleBossArt(id){
+ const cx=180,cy=118;
+ ctx.save();
+ if(id==='taku'||id==='taku2'){
+   // Large dedicated final-boss portrait, drawn safely on canvas with no animation effects.
+   ctx.fillStyle=id==='taku2'?'#291032':'#201128';ctx.fillRect(65,28,230,172);
+   ctx.fillStyle=id==='taku2'?'#7d1f72':'#4d1d63';
+   ctx.beginPath();ctx.moveTo(180,42);ctx.lineTo(105,175);ctx.lineTo(255,175);ctx.closePath();ctx.fill();
+   if(id==='taku2'){
+     ctx.fillStyle='#9d2d8f';
+     ctx.beginPath();ctx.moveTo(135,80);ctx.lineTo(75,48);ctx.lineTo(103,130);ctx.closePath();ctx.fill();
+     ctx.beginPath();ctx.moveTo(225,80);ctx.lineTo(285,48);ctx.lineTo(257,130);ctx.closePath();ctx.fill();
+   }
+   ctx.fillStyle='#1a1520';ctx.beginPath();ctx.arc(180,83,id==='taku2'?35:30,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#d12e45';ctx.fillRect(163,78,9,5);ctx.fillRect(188,78,9,5);
+   ctx.fillStyle='#d7b64b';ctx.fillRect(149,49,62,7);
+   ctx.beginPath();ctx.moveTo(151,49);ctx.lineTo(157,28);ctx.lineTo(166,49);ctx.lineTo(180,20);ctx.lineTo(194,49);ctx.lineTo(204,28);ctx.lineTo(210,49);ctx.fill();
+   ctx.fillStyle=id==='taku2'?'#f14aa8':'#8f3aaa';ctx.beginPath();ctx.arc(180,125,id==='taku2'?15:10,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#ddd';ctx.fillRect(235,58,8,95);ctx.fillStyle='#d7b64b';ctx.beginPath();ctx.arc(239,52,16,0,Math.PI*2);ctx.fill();
+ }else{
+   ctx.fillStyle='#111';ctx.fillRect(110,45,140,130);
+   ctx.fillStyle=id==='mat'?'#8b2e2e':'#303b77';ctx.fillRect(135,80,90,82);
+   ctx.fillStyle='#e9bd96';ctx.beginPath();ctx.arc(180,72,30,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle=id==='mat'?'#47271c':'#171c31';ctx.fillRect(148,48,64,20);
+   ctx.fillStyle='#fff';ctx.fillRect(163,68,7,4);ctx.fillRect(190,68,7,4);
+   ctx.fillStyle='#c9cdd5';ctx.fillRect(id==='mat'?225:128,55,8,105);
+ }
+ ctx.restore();
+}
 function render(){
  if(!state)return;
  const m=maps[state.map]; // ONE map source only
@@ -416,7 +498,7 @@ function render(){
  const cols=['#c14f4f','#4d7fb8','#699b55','#bd8744','#7f62a5'];
  (m.npcs||[]).forEach((n,i)=>{npcArt(n.x*T,n.y*T,cols[i%cols.length],i);if((n.quest===1&&!state.flags.quest1)||(n.quest===2&&!state.flags.quest2)){ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(n.x*T+12,n.y*T-3,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.font='bold 11px sans-serif';ctx.fillText('!',n.x*T+10,n.y*T+1)}});
  for(const c of (m.chests||[]))if(!state.chests[c.id]){ctx.fillStyle='#5b371c';ctx.fillRect(c.x*T+2,c.y*T+9,20,12);ctx.fillStyle='#d69a32';ctx.fillRect(c.x*T+3,c.y*T+6,18,8);ctx.fillStyle='#f0c85a';ctx.fillRect(c.x*T+10,c.y*T+11,4,6)}
- if(m.boss&&!bossDone(m.boss.id))monsterArt(m.boss.x*T,m.boss.y*T,bosses[m.boss.id].color,true);
+ if(m.boss&&!bossDone(m.boss.id))bossMapArt(m.boss.id,m.boss.x,m.boss.y);
  heroArt(state.x*T,state.y*T); // ALWAYS LAST
  if(m.kind==='town'){const guide=(state.map==='osaka'&&!state.flags.quest1)||(state.map==='kyoto'&&!state.flags.quest2)?'Aで「！」の住人に話しかけよう':'黄色い広い「出口」から外へ';ctx.fillStyle='#fffef0ee';ctx.fillRect(48,318,264,28);ctx.strokeStyle='#6f5a2d';ctx.strokeRect(48,318,264,28);ctx.fillStyle='#171717';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(guide,180,337);ctx.textAlign='left'}
  updateTop();
