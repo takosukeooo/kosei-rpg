@@ -8,55 +8,54 @@
 <title>勇者こうせいと大魔王タクソーン</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;background:#111;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;overflow:hidden}
-#app{height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:#151515}
-#top{height:48px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #555;background:#0d0d0d;font-size:13px;font-weight:800}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+#app{height:100dvh;max-width:520px;margin:auto;display:flex;flex-direction:column;background:#171717}
+#top{height:48px;padding:8px 10px;background:#0d0d0d;border-bottom:2px solid #555;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px}
 #gameWrap{position:relative;flex:1;min-height:0;background:#000}
-canvas{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
-#controls{height:210px;position:relative;border-top:2px solid #555;background:#202020;padding-bottom:env(safe-area-inset-bottom);overflow:hidden;touch-action:none}
-#moveZone{position:absolute;left:0;top:0;width:56%;height:100%;touch-action:none}
-#moveHint{position:absolute;left:18px;bottom:12px;color:#aaa;font-size:12px;font-weight:700;pointer-events:none}
-#divider{position:absolute;left:56%;top:18px;bottom:18px;width:1px;background:#ffffff22}
-#joystick{position:absolute;width:116px;height:116px;border-radius:50%;background:#292929e8;border:3px solid #777;box-shadow:inset 0 0 0 9px #1f1f1f,0 4px 12px #0008;display:none;pointer-events:none;z-index:4}
-#stick{position:absolute;left:38px;top:38px;width:40px;height:40px;border-radius:50%;background:#888;border:3px solid #d6d6d6;box-shadow:0 3px 8px #0008}
-.btn{position:absolute;border:2px solid #aaa;color:#fff;background:#363636;display:flex;align-items:center;justify-content:center;font-weight:900;user-select:none;touch-action:none;z-index:5}
-#abtn{right:28px;top:28px;width:78px;height:78px;border-radius:50%;background:#8a2626;font-size:24px}
-#menuBtn{right:30px;top:124px;width:74px;height:44px;border-radius:10px;font-size:12px}
-#message{position:absolute;left:4%;right:4%;bottom:4%;min-height:82px;padding:12px 14px;background:#050505f2;border:3px solid #fff;border-radius:9px;z-index:15;display:none;line-height:1.5;font-weight:700}
-#message .hint{font-size:11px;color:#bbb;margin-top:6px}
-.panel{position:absolute;inset:3%;padding:14px;background:#070707f5;border:3px solid #fff;border-radius:9px;z-index:20;display:none;overflow:auto}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+#controls{height:215px;position:relative;background:#202020;border-top:2px solid #555;overflow:hidden;touch-action:none;padding-bottom:env(safe-area-inset-bottom)}
+#leftZone{position:absolute;left:0;top:0;width:57%;height:100%;touch-action:none}
+#divider{position:absolute;left:57%;top:15px;bottom:15px;width:1px;background:#ffffff22}
+#joyBase{position:absolute;left:24px;top:31px;width:132px;height:132px;border-radius:50%;background:#292929;border:4px solid #777;box-shadow:inset 0 0 0 12px #202020,0 4px 12px #0008;touch-action:none}
+#joyKnob{position:absolute;left:43px;top:43px;width:46px;height:46px;border-radius:50%;background:#8d8d8d;border:3px solid #ddd;box-shadow:0 3px 8px #0008;pointer-events:none}
+#moveHint{position:absolute;left:18px;bottom:10px;color:#aaa;font-weight:700;font-size:12px}
+.btn{position:absolute;display:flex;align-items:center;justify-content:center;border:2px solid #aaa;color:#fff;font-weight:900;background:#373737;user-select:none;touch-action:none}
+#abtn{right:28px;top:30px;width:80px;height:80px;border-radius:50%;background:#8c2929;font-size:25px}
+#menuBtn{right:30px;top:128px;width:76px;height:46px;border-radius:10px;font-size:12px}
+#msg{position:absolute;left:4%;right:4%;bottom:4%;z-index:20;display:none;background:#050505f2;border:3px solid #fff;border-radius:9px;padding:12px 14px;min-height:84px;line-height:1.5;font-weight:700}
+#msg .hint{font-size:11px;color:#bbb;margin-top:5px}
+.panel{position:absolute;inset:3%;z-index:25;display:none;background:#070707f7;border:3px solid #fff;border-radius:9px;padding:14px;overflow:auto}
 .panel h2{margin:0 0 10px;font-size:20px}
-.panel button{width:100%;padding:12px;margin:5px 0;border:2px solid #aaa;border-radius:7px;background:#272727;color:#fff;font-weight:800;font-size:15px}
+.panel button{width:100%;padding:12px;margin:5px 0;border:2px solid #aaa;border-radius:7px;background:#282828;color:#fff;font-weight:800;font-size:15px}
 .small{font-size:12px;color:#ccc}
-#title{position:absolute;inset:0;z-index:30;background:linear-gradient(#17294a,#090c12);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#title{position:absolute;inset:0;z-index:35;background:linear-gradient(#193054,#080b11);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 #title h1{font-size:27px;line-height:1.3;margin:0 0 8px}
 #title p{color:#ddd}
+#title .ver{font-size:11px;color:#9fb8d9;margin-bottom:12px}
 #title button{width:82%;padding:14px;margin:6px;border:2px solid #fff;border-radius:8px;background:#262626;color:#fff;font-size:17px;font-weight:900}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="top">
-    <span id="place">オオサカ</span>
-    <span id="stats">Lv1 HP 30/30 MP 10/10 100G</span>
-  </div>
+  <div id="top"><span id="place">オオサカ</span><span id="stats">Lv1 HP 30/30 MP 10/10 100G</span></div>
   <div id="gameWrap">
     <canvas id="game" width="360" height="360"></canvas>
-    <div id="message"></div>
+    <div id="msg"></div>
     <div id="menu" class="panel"></div>
     <div id="battle" class="panel"></div>
     <div id="shop" class="panel"></div>
     <div id="title">
       <h1>勇者こうせいと<br>大魔王タクソーン</h1>
       <p>世界の命運は、だいたいこうせいに託された。</p>
+      <div class="ver">再構築版 v4</div>
       <button onclick="newGame()">はじめから</button>
       <button onclick="continueGame()">つづきから</button>
     </div>
   </div>
   <div id="controls">
-    <div id="moveZone"></div>
-    <div id="moveHint">左側の好きな場所を触って移動</div>
-    <div id="joystick"><div id="stick"></div></div>
+    <div id="leftZone"></div>
+    <div id="joyBase"><div id="joyKnob"></div></div>
+    <div id="moveHint">左スティックで移動</div>
     <div id="divider"></div>
     <div class="btn" id="abtn">A</div>
     <div class="btn" id="menuBtn">MENU</div>
@@ -64,40 +63,29 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;touch-acti
 </div>
 
 <script>
-const canvas=document.getElementById('game');
-const ctx=canvas.getContext('2d');
-const message=document.getElementById('message');
-const menu=document.getElementById('menu');
-const battle=document.getElementById('battle');
-const shop=document.getElementById('shop');
-const title=document.getElementById('title');
+const SAVE_KEY='koseiRPG_v4';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const msg=document.getElementById('msg'),menu=document.getElementById('menu'),battle=document.getElementById('battle'),shop=document.getElementById('shop'),title=document.getElementById('title');
 const T=24,W=15,H=15;
+ctx.imageSmoothingEnabled=false;
 
-let state=null;
-let mode='title';
-let facing='down';
-let enemy=null;
-let bossFight=false;
+let state=null,mode='title',facing='down',enemy=null,bossFight=false,lastEncounterStep=0;
 
 const spells=[
- {name:'屁',lv:1,mp:2,pow:8},
- {name:'静電気',lv:3,mp:4,pow:16},
- {name:'ちょい波動',lv:6,mp:7,pow:29},
- {name:'ビッグバン',lv:9,mp:12,pow:50}
+ {name:'屁',lv:1,mp:2,pow:8},{name:'静電気',lv:3,mp:4,pow:16},
+ {name:'ちょい波動',lv:6,mp:7,pow:29},{name:'ビッグバン',lv:9,mp:12,pow:50}
 ];
-const swords=[
- ['木っぽい剣',0,0],['銅の剣',80,4],['鉄の剣',180,8],['鋼の剣',350,13],['勇者っぽい剣',650,19],['伝説かもしれない剣',1000,26]
-];
+const swords=[['木っぽい剣',0,0],['銅の剣',80,4],['鉄の剣',180,8],['鋼の剣',350,13],['勇者っぽい剣',650,19],['伝説かもしれない剣',1000,26]];
 const heads=[['布の帽子',0,0],['鉄の兜',200,6],['勇者ヘルメット',500,11]];
 const bodies=[['旅人の服',0,0],['鉄の鎧',250,7],['勇者ジャケット',700,15]];
 const accs=[['なし',0,0],['根性のお守り',120,2],['謎の指輪',300,5],['タコ焼きチャーム',450,8],['上品なお守り',650,11]];
 
 const monsters={
- slime:{name:'スライム',hp:12,atk:5,def:1,xp:5,g:7,color:'#4ac7e8'},
- gob:{name:'ゴブリン',hp:20,atk:8,def:2,xp:9,g:12,color:'#70b94c'},
- hob:{name:'ホブゴブリン',hp:30,atk:11,def:4,xp:15,g:20,color:'#c59b45'},
- toku:{name:'トクレン',hp:40,atk:14,def:6,xp:24,g:32,color:'#d85a5a'},
- riri:{name:'リリポン',hp:48,atk:16,def:7,xp:30,g:40,color:'#c55bd5'}
+ slime:{name:'スライム',hp:12,atk:5,def:1,xp:5,g:7,color:'#49c6e5'},
+ gob:{name:'ゴブリン',hp:20,atk:8,def:2,xp:9,g:12,color:'#6fac4d'},
+ hob:{name:'ホブゴブリン',hp:30,atk:11,def:4,xp:15,g:20,color:'#c49b43'},
+ toku:{name:'トクレン',hp:40,atk:14,def:6,xp:24,g:32,color:'#d65a5a'},
+ riri:{name:'リリポン',hp:48,atk:16,def:7,xp:30,g:40,color:'#c25bd0'}
 };
 const bosses={
  mat:{name:'まっちゃん',hp:75,atk:12,def:4,xp:55,g:100,color:'#e27a3f'},
@@ -107,8 +95,7 @@ const bosses={
 
 const maps={
  osaka:{
-  name:'オオサカ',kind:'town',bg:'#b9c77d',spawn:[7,11],
-  blocks:[],
+  name:'オオサカ',kind:'town',bg:'#b9c77d',
   buildings:[
    {x:1,y:1,w:4,h:3,label:'武器',type:'weapon'},
    {x:6,y:1,w:3,h:3,label:'防具',type:'armor'},
@@ -119,14 +106,13 @@ const maps={
   npcs:[
    {x:7,y:6,text:"兄ちゃんが勇者こうせいか？\\nえらいシュッとしてるやん。知らんけど。"},
    {x:6,y:9,text:"大魔王タクソーン？そら強いやろ。\\n名前に『大』ついとるし。"},
-   {x:10,y:11,text:"洞窟のまっちゃん倒してきてや！\\n倒したら『第一の証』が手に入るらしいで。",quest:1},
+   {x:10,y:11,text:"洞窟のまっちゃん倒してきてや！\\n倒したら第一の証が手に入るらしいで。",quest:1},
    {x:3,y:11,text:"重要なヒント欲しい？\\nワシも欲しいわ。"}
   ],
-  exit:{x1:6,x2:8,y:14,to:'field',tx:3,ty:12}
+  exit:{x1:5,x2:9,y:14,to:'field',tx:3,ty:12}
  },
  kyoto:{
-  name:'キョウト',kind:'town',bg:'#c7bb90',spawn:[7,11],
-  blocks:[],
+  name:'キョウト',kind:'town',bg:'#c8bc91',
   buildings:[
    {x:1,y:1,w:4,h:3,label:'武器',type:'weapon'},
    {x:6,y:1,w:3,h:3,label:'防具',type:'armor'},
@@ -140,10 +126,10 @@ const maps={
    {x:10,y:11,text:"ニシはんを倒していただけると助かります。\\n勇者様なら当然できますやろ？",quest:2},
    {x:3,y:11,text:"お疲れの顔してはりますなぁ。\\n宿屋という便利な建物、ご存じどす？"}
   ],
-  exit:{x1:6,x2:8,y:14,to:'field',tx:11,ty:12}
+  exit:{x1:5,x2:9,y:14,to:'field',tx:11,ty:12}
  },
  field:{
-  name:'ワールドマップ',kind:'field',bg:'#4f9a4f',spawn:[3,12],
+  name:'ワールドマップ',kind:'field',bg:'#4f9a4f',
   spots:[
    {x:3,y:13,to:'osaka',tx:7,ty:12,label:'オオサカ'},
    {x:3,y:5,to:'cave1',tx:7,ty:13,label:'洞窟①'},
@@ -153,35 +139,27 @@ const maps={
   ]
  },
  cave1:{
-  name:'まっちゃんの洞窟',kind:'dungeon',bg:'#3b3740',spawn:[7,13],
+  name:'まっちゃんの洞窟',kind:'dungeon',bg:'#3d3941',
   walls:[[0,0,15,1],[0,0,1,15],[14,0,1,15],[3,3,8,1],[3,7,1,5],[7,5,1,6],[10,7,1,5]],
-  exit:{x1:6,x2:8,y:14,to:'field',tx:3,ty:6},
+  exit:{x1:5,x2:9,y:14,to:'field',tx:3,ty:6},
   boss:{x:7,y:1,id:'mat'},
-  chests:[
-   {x:2,y:5,id:'c1a',g:80},
-   {x:12,y:9,id:'c1b',item:'herb'},
-   {x:5,y:12,id:'c1c',equip:['sword',2]}
-  ]
+  chests:[{x:2,y:5,id:'c1a',g:80},{x:12,y:9,id:'c1b',item:'herb'},{x:5,y:12,id:'c1c',equip:['sword',2]}]
  },
  cave2:{
-  name:'ニシの洞窟',kind:'dungeon',bg:'#333b47',spawn:[7,13],
+  name:'ニシの洞窟',kind:'dungeon',bg:'#343b47',
   walls:[[0,0,15,1],[0,0,1,15],[14,0,1,15],[2,3,10,1],[4,6,1,6],[8,5,1,7],[11,7,1,5]],
-  exit:{x1:6,x2:8,y:14,to:'field',tx:11,ty:6},
+  exit:{x1:5,x2:9,y:14,to:'field',tx:11,ty:6},
   boss:{x:7,y:1,id:'nishi'},
-  chests:[
-   {x:12,y:5,id:'c2a',g:160},
-   {x:2,y:10,id:'c2b',item:'water'},
-   {x:6,y:12,id:'c2c',equip:['body',2]}
-  ]
+  chests:[{x:12,y:5,id:'c2a',g:160},{x:2,y:10,id:'c2b',item:'water'},{x:6,y:12,id:'c2c',equip:['body',2]}]
  },
  castle:{
-  name:'大魔王の屋敷',kind:'castle',bg:'#321d38',spawn:[7,12],
-  exit:{x1:6,x2:8,y:14,to:'field',tx:7,ty:3},
+  name:'大魔王の屋敷',kind:'castle',bg:'#321d38',
+  exit:{x1:5,x2:9,y:14,to:'field',tx:7,ty:3},
   boss:{x:7,y:4,id:'taku'}
  }
 };
 
-function freshState(){
+function initialState(){
  return {
   map:'osaka',x:7,y:11,lv:1,xp:0,next:18,
   hp:30,maxhp:30,mp:10,maxmp:10,atk:7,def:3,g:100,
@@ -189,584 +167,274 @@ function freshState(){
   owned:{sword:[0],head:[0],body:[0],acc:[0]},
   eq:{sword:0,head:0,body:0,acc:0},
   flags:{quest1:false,boss1:false,quest2:false,boss2:false,final:false},
-  chests:{},save:null
+  chests:{},save:null,steps:0
  };
 }
-
-function migrate(s){
- if(!s.owned)s.owned={sword:[0],head:[0],body:[0],acc:[0]};
- for(const k of ['sword','head','body','acc']){
-  if(!Array.isArray(s.owned[k]))s.owned[k]=[0];
-  if(!s.owned[k].includes(0))s.owned[k].unshift(0);
-  if(s.eq && !s.owned[k].includes(s.eq[k]))s.owned[k].push(s.eq[k]);
- }
- if(!s.flags)s.flags={quest1:false,boss1:false,quest2:false,boss2:false,final:false};
- if(!s.chests)s.chests={};
- if(!s.items)s.items={herb:0,water:0,warp:0};
- return s;
-}
-
 function newGame(){
- state=freshState();
- title.style.display='none';
- mode='message';
- render();
- showText("世界は大魔王タクソーンに支配されようとしていた！\\n勇者に選ばれたこうせいは、一人で冒険へ出ることになった。\\n\\nまずは町の『！』が出ている住人に A で話しかけよう。");
+ state=initialState();mode='map';title.style.display='none';render();
+ showText("世界は大魔王タクソーンに支配されようとしていた！\\n勇者に選ばれたこうせいは一人で旅立つことになった。\\n\\nまずは町の『！』が付いた住人に A で話しかけよう。");
 }
 function continueGame(){
- const raw=localStorage.getItem('koseiRPG');
- if(!raw){alert('セーブデータがない！');return}
- state=migrate(JSON.parse(raw));
- title.style.display='none';
- mode='map';
- render();
+ const raw=localStorage.getItem(SAVE_KEY);
+ if(!raw){alert('この再構築版のセーブデータはまだない！\\n「はじめから」で開始してね。');return}
+ state=JSON.parse(raw);mode='map';title.style.display='none';render();
 }
 function saveGame(){
  state.save={map:state.map,x:state.x,y:state.y};
- localStorage.setItem('koseiRPG',JSON.stringify(state));
- showText("教会に冒険の記録を残した！\\nこれで倒れても、ここから再出発できる。");
+ localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+ showText("教会に冒険の記録を残した！\\n倒れてもここから再出発できる。");
 }
-
-function calcAtk(){return state.atk+swords[state.eq.sword][2]}
-function calcDef(){return state.def+heads[state.eq.head][2]+bodies[state.eq.body][2]+accs[state.eq.acc][2]}
-function itemName(k){return {herb:'薬草',water:'聖水',warp:'ワープマン'}[k]}
-function equipName(k,i){return {sword:swords,head:heads,body:bodies,acc:accs}[k][i][0]}
-function bossDone(id){return id==='mat'?state.flags.boss1:id==='nishi'?state.flags.boss2:state.flags.final}
-
 function updateTop(){
  if(!state)return;
  document.getElementById('place').textContent=maps[state.map].name;
  document.getElementById('stats').textContent=`Lv${state.lv} HP ${state.hp}/${state.maxhp} MP ${state.mp}/${state.maxmp} ${state.g}G`;
 }
+function calcAtk(){return state.atk+swords[state.eq.sword][2]}
+function calcDef(){return state.def+heads[state.eq.head][2]+bodies[state.eq.body][2]+accs[state.eq.acc][2]}
+function bossDone(id){return id==='mat'?state.flags.boss1:id==='nishi'?state.flags.boss2:state.flags.final}
+function itemName(k){return {herb:'薬草',water:'聖水',warp:'ワープマン'}[k]}
+function equipName(slot,i){return {sword:swords,head:heads,body:bodies,acc:accs}[slot][i][0]}
 
-function showText(text,cb=null){
- mode='message';
- message.innerHTML=text.replace(/\n/g,'<br>')+"<div class='hint'>Aで閉じる</div>";
- message.style.display='block';
- message._cb=cb;
-}
-function closeMessage(){
- if(mode!=='message')return;
- message.style.display='none';
- const cb=message._cb;message._cb=null;
- mode='map';
- if(cb)cb();
- render();
-}
+function showText(t,cb=null){mode='message';msg.innerHTML=t.replace(/\n/g,'<br>')+"<div class='hint'>Aで閉じる</div>";msg.style.display='block';msg._cb=cb}
+function closeText(){if(mode!=='message')return;msg.style.display='none';const cb=msg._cb;msg._cb=null;mode='map';if(cb)cb();render()}
+function closePanels(){menu.style.display=shop.style.display=battle.style.display='none';mode='map';render()}
 
 function inRect(x,y,r){return x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3]}
-function isExitTile(m,x,y){return !!(m.exit && y===m.exit.y && x>=m.exit.x1 && x<=m.exit.x2)}
+function isExit(m,x,y){return !!(m.exit&&y===m.exit.y&&x>=m.exit.x1&&x<=m.exit.x2)}
 function blocked(x,y){
  const m=maps[state.map];
  if(x<0||y<0||x>=W||y>=H)return true;
- if(isExitTile(m,x,y))return false;
+ if(isExit(m,x,y))return false;
  if((m.walls||[]).some(r=>inRect(x,y,r)))return true;
  if((m.buildings||[]).some(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h))return true;
  if((m.npcs||[]).some(n=>n.x===x&&n.y===y))return true;
- if((m.chests||[]).some(ch=>ch.x===x&&ch.y===y&&!state.chests[ch.id]))return true;
- if(m.boss && m.boss.x===x && m.boss.y===y && !bossDone(m.boss.id))return true;
+ if((m.chests||[]).some(c=>c.x===x&&c.y===y&&!state.chests[c.id]))return true;
+ if(m.boss&&m.boss.x===x&&m.boss.y===y&&!bossDone(m.boss.id))return true;
  return false;
 }
 
 function move(dx,dy,dir){
- if(mode!=='map'||!state)return;
+ if(mode!=='map')return;
  facing=dir;
  const nx=state.x+dx,ny=state.y+dy;
- if(!blocked(nx,ny)){
-  state.x=nx;state.y=ny;
-  transitionCheck();
-  if(mode==='map'){
-   const kind=maps[state.map].kind;
-   if((kind==='field'||kind==='dungeon') && Math.random()<0.09) randomBattle();
+ if(blocked(nx,ny)){render();return}
+ state.x=nx;state.y=ny;state.steps++;
+ transition();
+ if(mode==='map'){
+  const kind=maps[state.map].kind;
+  if((kind==='field'||kind==='dungeon') && state.steps-lastEncounterStep>=3 && Math.random()<0.08){
+   lastEncounterStep=state.steps;randomBattle();
   }
  }
  render();
 }
-
-function transitionCheck(){
+function transition(){
  const m=maps[state.map];
- if(isExitTile(m,state.x,state.y)){
-  go(m.exit.to,m.exit.tx,m.exit.ty);
-  return;
- }
+ if(isExit(m,state.x,state.y)){go(m.exit.to,m.exit.tx,m.exit.ty);return}
  for(const s of (m.spots||[])){
   if(state.x===s.x&&state.y===s.y){
-   if(s.locked && !(state.flags.boss1&&state.flags.boss2)){
-    showText("不思議な結界に阻まれた。\\n二つの証が必要らしい。");
-   }else go(s.to,s.tx,s.ty);
-   return;
+   if(s.locked&&!(state.flags.boss1&&state.flags.boss2)){showText("不思議な結界に阻まれた。\\n二つの証が必要らしい。");return}
+   go(s.to,s.tx,s.ty);return;
   }
  }
 }
-function go(map,x,y){
- state.map=map;state.x=x;state.y=y;
- if(map==='castle'&&!state.flags.final){
-  showText("二つの証が光る！\\n大魔王タクソーンの屋敷へ入った！");
- }
-}
+function go(map,x,y){state.map=map;state.x=x;state.y=y;render();if(map==='castle'&&!state.flags.final)showText("二つの証が光る！\\n大魔王タクソーンの屋敷へ入った！")}
 
-function frontTile(){
- const d={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[facing];
- return [state.x+d[0],state.y+d[1]];
-}
+function front(){const d={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[facing];return[state.x+d[0],state.y+d[1]]}
 function interact(){
- if(mode!=='map'||!state)return;
- const [x,y]=frontTile(),m=maps[state.map];
-
- const npc=(m.npcs||[]).find(n=>n.x===x&&n.y===y);
- if(npc){
-  if(npc.quest===1)state.flags.quest1=true;
-  if(npc.quest===2)state.flags.quest2=true;
-  showText(npc.text);
-  return;
- }
-
- const building=(m.buildings||[]).find(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h);
- if(building){buildingAction(building.type);return}
-
- const chest=(m.chests||[]).find(ch=>ch.x===x&&ch.y===y&&!state.chests[ch.id]);
- if(chest){openChest(chest);return}
-
- if(m.boss && m.boss.x===x&&m.boss.y===y&&!bossDone(m.boss.id)){
-  startBattle(m.boss.id,true);return;
- }
-
+ if(mode!=='map')return;
+ const [x,y]=front(),m=maps[state.map];
+ const n=(m.npcs||[]).find(n=>n.x===x&&n.y===y);
+ if(n){if(n.quest===1)state.flags.quest1=true;if(n.quest===2)state.flags.quest2=true;showText(n.text);return}
+ const b=(m.buildings||[]).find(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h);
+ if(b){building(b.type);return}
+ const c=(m.chests||[]).find(c=>c.x===x&&c.y===y&&!state.chests[c.id]);
+ if(c){openChest(c);return}
+ if(m.boss&&m.boss.x===x&&m.boss.y===y&&!bossDone(m.boss.id)){startBattle(m.boss.id,true);return}
  showText("特に何もない。\\nこうせいはちょっと気まずくなった。");
 }
-
-function buildingAction(type){
- if(type==='church'){
-  showText("神父「冒険の記録、残しとく？」",()=>saveGame());
-  return;
- }
+function building(type){
+ if(type==='church'){showText("神父「冒険の記録、残しとく？」",saveGame);return}
  if(type==='inn'){
-  const cost=20;
-  if(state.g<cost){showText("宿屋「お金が足りませんえ。」");return}
-  state.g-=cost;state.hp=state.maxhp;state.mp=state.maxmp;updateTop();
-  showText(`宿屋で休んだ！ ${cost}G払った。\\nHPとMPが全回復した。`);
-  return;
+  if(state.g<20){showText("宿屋「お金が足りませんえ。」");return}
+  state.g-=20;state.hp=state.maxhp;state.mp=state.maxmp;updateTop();showText("宿屋で休んだ！ 20G払った。\\nHPとMPが全回復した。");return
  }
  openShop(type);
 }
-
-function openChest(ch){
- state.chests[ch.id]=true;
- if(ch.g){
-  state.g+=ch.g;showText(`宝箱から ${ch.g}G 手に入れた！`);
- }else if(ch.item){
-  state.items[ch.item]=(state.items[ch.item]||0)+1;
-  showText(`宝箱から ${itemName(ch.item)} を手に入れた！`);
- }else if(ch.equip){
-  const [slot,i]=ch.equip;
-  if(!state.owned[slot].includes(i))state.owned[slot].push(i);
-  showText(`宝箱から ${equipName(slot,i)} を手に入れた！\\nMENU → そうび から装備できる。`);
- }
+function openChest(c){
+ state.chests[c.id]=true;
+ if(c.g){state.g+=c.g;showText(`宝箱から ${c.g}G 手に入れた！`)}
+ else if(c.item){state.items[c.item]++;showText(`宝箱から ${itemName(c.item)} を手に入れた！`)}
+ else if(c.equip){const [slot,i]=c.equip;if(!state.owned[slot].includes(i))state.owned[slot].push(i);showText(`宝箱から ${equipName(slot,i)} を手に入れた！\\nMENU → そうび から装備できる。`)}
  updateTop();
 }
 
 function openShop(type){
- mode='shop';shop.style.display='block';
- let items=[];
- if(type==='weapon')items=swords.slice(1).map((it,i)=>({name:it[0],price:it[1],power:it[2],slot:'sword',index:i+1}));
- else if(type==='armor'){
-  items=[
-   ...heads.slice(1).map((it,i)=>({name:it[0],price:it[1],power:it[2],slot:'head',index:i+1})),
-   ...bodies.slice(1).map((it,i)=>({name:it[0],price:it[1],power:it[2],slot:'body',index:i+1})),
-   ...accs.slice(1).map((it,i)=>({name:it[0],price:it[1],power:it[2],slot:'acc',index:i+1}))
-  ];
- }else{
-  items=[
-   {name:'薬草',price:15,item:'herb'},
-   {name:'聖水',price:25,item:'water'},
-   {name:'ワープマン',price:40,item:'warp'}
-  ];
- }
- shop._items=items;shop._type=type;
- shop.innerHTML=`<h2>${type==='weapon'?'武器屋':type==='armor'?'防具屋':'道具屋'}</h2><p class="small">所持金 ${state.g}G</p>`+
- items.map((it,i)=>`<button onclick="buyShopItem(${i})">${it.name}　${it.price}G${it.power!=null?'　強さ+'+it.power:''}</button>`).join('')+
+ mode='shop';shop.style.display='block';shop._type=type;
+ let arr=[];
+ if(type==='weapon')arr=swords.slice(1).map((a,i)=>({name:a[0],price:a[1],power:a[2],slot:'sword',index:i+1}));
+ else if(type==='armor')arr=[
+  ...heads.slice(1).map((a,i)=>({name:a[0],price:a[1],power:a[2],slot:'head',index:i+1})),
+  ...bodies.slice(1).map((a,i)=>({name:a[0],price:a[1],power:a[2],slot:'body',index:i+1})),
+  ...accs.slice(1).map((a,i)=>({name:a[0],price:a[1],power:a[2],slot:'acc',index:i+1}))
+ ];
+ else arr=[{name:'薬草',price:15,item:'herb'},{name:'聖水',price:25,item:'water'},{name:'ワープマン',price:40,item:'warp'}];
+ shop._arr=arr;
+ shop.innerHTML=`<h2>${type==='weapon'?'武器屋':type==='armor'?'防具屋':'道具屋'}</h2><p class="small">${state.g}G</p>`+
+ arr.map((it,i)=>`<button onclick="buy(${i})">${it.name}　${it.price}G${it.power!=null?'　強さ+'+it.power:''}</button>`).join('')+
  `<button onclick="closePanels()">やめる</button>`;
 }
-function buyShopItem(i){
- const it=shop._items[i];
- if(state.g<it.price){showText("お金が足りない！");return}
+function buy(i){
+ const it=shop._arr[i];if(state.g<it.price){showText("お金が足りない！");return}
  state.g-=it.price;
- if(it.item){
-  state.items[it.item]=(state.items[it.item]||0)+1;
- }else{
-  if(!state.owned[it.slot].includes(it.index))state.owned[it.slot].push(it.index);
-  state.eq[it.slot]=it.index;
- }
+ if(it.item)state.items[it.item]++;
+ else{if(!state.owned[it.slot].includes(it.index))state.owned[it.slot].push(it.index);state.eq[it.slot]=it.index}
  updateTop();openShop(shop._type);
-}
-
-function closePanels(){
- menu.style.display='none';battle.style.display='none';shop.style.display='none';
- mode='map';render();
 }
 
 function openMenu(){
  if(mode!=='map')return;
  mode='menu';menu.style.display='block';
- const objective=
-  !state.flags.quest1?'オオサカの「！」の住人に話を聞く':
-  !state.flags.boss1?'洞窟①のまっちゃんを倒す':
-  !state.flags.quest2?'キョウトの「！」の住人に話を聞く':
-  !state.flags.boss2?'洞窟②のニシを倒す':
-  !state.flags.final?'大魔王タクソーンの屋敷へ向かう':
-  '世界は救われた！';
- menu.innerHTML=`<h2>MENU</h2>
- <p class="small">目的：${objective}</p>
- <button onclick="openEquipMenu()">そうび</button>
- <button onclick="openItemMenu()">どうぐ</button>
- <button onclick="openStatusMenu()">つよさ</button>
- <button onclick="closePanels()">閉じる</button>`;
+ const obj=!state.flags.quest1?'オオサカの「！」の住人に話す':!state.flags.boss1?'洞窟①のまっちゃんを倒す':!state.flags.quest2?'キョウトの「！」の住人に話す':!state.flags.boss2?'洞窟②のニシを倒す':!state.flags.final?'大魔王タクソーンの屋敷へ':'世界は救われた！';
+ menu.innerHTML=`<h2>MENU</h2><p class="small">目的：${obj}</p><button onclick="equipMenu()">そうび</button><button onclick="itemMenu()">どうぐ</button><button onclick="statusMenu()">つよさ</button><button onclick="closePanels()">閉じる</button>`;
 }
-function reopenMenu(){
- mode='map';menu.style.display='none';openMenu();
+function mainMenu(){mode='map';menu.style.display='none';openMenu()}
+function equipMenu(){
+ menu.innerHTML=`<h2>そうび</h2><p>攻撃 ${calcAtk()}　防御 ${calcDef()}</p>
+ <button onclick="choose('sword')">武器：${swords[state.eq.sword][0]}</button>
+ <button onclick="choose('head')">頭：${heads[state.eq.head][0]}</button>
+ <button onclick="choose('body')">胴：${bodies[state.eq.body][0]}</button>
+ <button onclick="choose('acc')">アクセ：${accs[state.eq.acc][0]}</button>
+ <button onclick="mainMenu()">戻る</button>`;
 }
-function openEquipMenu(){
- mode='menu';menu.style.display='block';
- menu.innerHTML=`<h2>そうび</h2>
- <p>攻撃 ${calcAtk()}　防御 ${calcDef()}</p>
- <button onclick="chooseEquip('sword')">武器：${swords[state.eq.sword][0]}</button>
- <button onclick="chooseEquip('head')">頭：${heads[state.eq.head][0]}</button>
- <button onclick="chooseEquip('body')">胴：${bodies[state.eq.body][0]}</button>
- <button onclick="chooseEquip('acc')">アクセ：${accs[state.eq.acc][0]}</button>
- <button onclick="reopenMenu()">戻る</button>`;
-}
-function chooseEquip(slot){
+function choose(slot){
  const arr={sword:swords,head:heads,body:bodies,acc:accs}[slot];
- const label={sword:'武器',head:'頭',body:'胴',acc:'アクセ'}[slot];
- menu.innerHTML=`<h2>${label}を選ぶ</h2>`+
- state.owned[slot].map(i=>`<button onclick="equipItem('${slot}',${i})">${state.eq[slot]===i?'▶ ':''}${arr[i][0]}　${slot==='sword'?'攻撃':'防御'}+${arr[i][2]}</button>`).join('')+
- `<button onclick="openEquipMenu()">戻る</button>`;
+ menu.innerHTML=`<h2>装備を選ぶ</h2>`+state.owned[slot].map(i=>`<button onclick="setEquip('${slot}',${i})">${state.eq[slot]===i?'▶ ':''}${arr[i][0]}　${slot==='sword'?'攻撃':'防御'}+${arr[i][2]}</button>`).join('')+`<button onclick="equipMenu()">戻る</button>`;
 }
-function equipItem(slot,i){state.eq[slot]=i;updateTop();openEquipMenu()}
-function openItemMenu(){
- menu.innerHTML=`<h2>どうぐ</h2>
- <p>薬草×${state.items.herb||0}<br>聖水×${state.items.water||0}<br>ワープマン×${state.items.warp||0}</p>
- <button onclick="fieldUse('herb')">薬草を使う</button>
- <button onclick="fieldUse('water')">聖水を使う</button>
- <button onclick="fieldUse('warp')">ワープマンを使う</button>
- <button onclick="reopenMenu()">戻る</button>`;
+function setEquip(slot,i){state.eq[slot]=i;updateTop();equipMenu()}
+function itemMenu(){
+ menu.innerHTML=`<h2>どうぐ</h2><p>薬草×${state.items.herb}<br>聖水×${state.items.water}<br>ワープマン×${state.items.warp}</p>
+ <button onclick="fieldItem('herb')">薬草を使う</button><button onclick="fieldItem('water')">聖水を使う</button><button onclick="fieldItem('warp')">ワープマンを使う</button><button onclick="mainMenu()">戻る</button>`;
 }
-function openStatusMenu(){
- menu.innerHTML=`<h2>つよさ</h2>
- <p>Lv ${state.lv}<br>HP ${state.hp}/${state.maxhp}<br>MP ${state.mp}/${state.maxmp}<br>
- 攻撃 ${calcAtk()}<br>防御 ${calcDef()}<br>EXP ${state.xp}/${state.next}<br>${state.g}G</p>
- <p>武器：${swords[state.eq.sword][0]}<br>頭：${heads[state.eq.head][0]}<br>胴：${bodies[state.eq.body][0]}<br>アクセ：${accs[state.eq.acc][0]}</p>
- <button onclick="reopenMenu()">戻る</button>`;
-}
-function fieldUse(k){
- if(!(state.items[k]>0))return;
+function fieldItem(k){
+ if(state.items[k]<=0)return;
  if(k==='herb'){state.items[k]--;state.hp=Math.min(state.maxhp,state.hp+25)}
  else if(k==='water'){state.items[k]--;state.mp=Math.min(state.maxmp,state.mp+12)}
- else{
-  if(maps[state.map].kind!=='dungeon')return;
-  state.items[k]--;
-  go('field',state.map==='cave1'?3:11,6);
- }
- updateTop();openItemMenu();
+ else{if(maps[state.map].kind!=='dungeon')return;state.items[k]--;go('field',state.map==='cave1'?3:11,6)}
+ updateTop();itemMenu();
 }
+function statusMenu(){menu.innerHTML=`<h2>つよさ</h2><p>Lv ${state.lv}<br>HP ${state.hp}/${state.maxhp}<br>MP ${state.mp}/${state.maxmp}<br>攻撃 ${calcAtk()}<br>防御 ${calcDef()}<br>EXP ${state.xp}/${state.next}<br>${state.g}G</p><button onclick="mainMenu()">戻る</button>`}
 
 function randomBattle(){
- let pool;
- if(state.map==='cave1')pool=['slime','gob','hob'];
- else if(state.map==='cave2')pool=['hob','toku','riri'];
- else pool=state.flags.boss1?['gob','hob','toku']:['slime','gob'];
+ const pool=state.map==='cave1'?['slime','gob','hob']:state.map==='cave2'?['hob','toku','riri']:state.flags.boss1?['gob','hob','toku']:['slime','gob'];
  startBattle(pool[Math.floor(Math.random()*pool.length)],false);
 }
-function startBattle(id,isBoss){
- mode='battle';bossFight=isBoss;
- const src=isBoss?bosses[id]:monsters[id];
- enemy={...src,id,maxhp:src.hp};
- battle.style.display='block';
- battleRender(`${enemy.name}が あらわれた！`);
+function startBattle(id,boss){
+ mode='battle';bossFight=boss;const src=boss?bosses[id]:monsters[id];enemy={...src,id,maxhp:src.hp};battle.style.display='block';battleUI(`${enemy.name}が あらわれた！`);
 }
-function battleRender(text='どうする？'){
- battle.innerHTML=`<h2>${enemy.name}</h2><p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${text}</p>
- <button onclick="attack()">たたかう</button>
- <button onclick="spellMenu()">じゅもん</button>
- <button onclick="battleItemMenu()">どうぐ</button>
- <button onclick="runAway()">にげる</button>`;
-}
-function attack(){
- const dmg=Math.max(1,calcAtk()+Math.floor(Math.random()*5)-enemy.def);
- enemy.hp-=dmg;if(enemy.hp<=0){winBattle();return}
- enemyTurn(`こうせいの攻撃！ ${dmg}ダメージ！`);
-}
-function spellMenu(){
- const known=spells.filter(s=>state.lv>=s.lv);
- battle.innerHTML=`<h2>じゅもん</h2>`+
- known.map((s,i)=>`<button onclick="castSpell(${i})">${s.name}　MP${s.mp}</button>`).join('')+
- `<button onclick="battleRender()">戻る</button>`;
- battle._known=known;
-}
-function castSpell(i){
- const s=battle._known[i];
- if(state.mp<s.mp){battleRender("MPが足りない！");return}
- state.mp-=s.mp;
- const dmg=Math.max(1,Math.floor(s.pow+Math.random()*6+state.lv-enemy.def/2));
- enemy.hp-=dmg;if(enemy.hp<=0){winBattle();return}
- enemyTurn(`${s.name}！ ${dmg}ダメージ！`);
-}
-function battleItemMenu(){
- battle.innerHTML=`<h2>どうぐ</h2>
- <button onclick="battleUse('herb')">薬草 ×${state.items.herb||0}</button>
- <button onclick="battleUse('water')">聖水 ×${state.items.water||0}</button>
- <button onclick="battleRender()">戻る</button>`;
-}
-function battleUse(k){
- if(!(state.items[k]>0)){battleRender("持っていない！");return}
- state.items[k]--;
- if(k==='herb')state.hp=Math.min(state.maxhp,state.hp+25);
- else state.mp=Math.min(state.maxmp,state.mp+12);
- enemyTurn(`${itemName(k)}を使った！`);
-}
-function enemyTurn(prefix){
- const dmg=Math.max(1,enemy.atk+Math.floor(Math.random()*5)-calcDef());
- state.hp-=dmg;updateTop();
- if(state.hp<=0){die();return}
- battleRender(`${prefix}<br>${enemy.name}の攻撃！ ${dmg}ダメージ！`);
-}
-function runAway(){
- if(bossFight){battleRender("ボス戦からは逃げられない！");return}
- if(Math.random()<0.75){closePanels();showText("うまく逃げ切った！")}
- else enemyTurn("しかし回り込まれた！");
-}
-function winBattle(){
- const id=enemy.id,name=enemy.name,xp=enemy.xp,g=enemy.g;
- state.g+=g;state.xp+=xp;
- if(bossFight){
-  if(id==='mat')state.flags.boss1=true;
-  if(id==='nishi')state.flags.boss2=true;
-  if(id==='taku')state.flags.final=true;
- }
+function battleUI(t='どうする？'){battle.innerHTML=`<h2>${enemy.name}</h2><p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${t}</p><button onclick="attack()">たたかう</button><button onclick="spellMenu()">じゅもん</button><button onclick="battleItems()">どうぐ</button><button onclick="runAway()">にげる</button>`}
+function attack(){const d=Math.max(1,calcAtk()+Math.floor(Math.random()*5)-enemy.def);enemy.hp-=d;if(enemy.hp<=0)return win();enemyTurn(`こうせいの攻撃！ ${d}ダメージ！`)}
+function spellMenu(){battle._sp=spells.filter(s=>state.lv>=s.lv);battle.innerHTML=`<h2>じゅもん</h2>`+battle._sp.map((s,i)=>`<button onclick="cast(${i})">${s.name}　MP${s.mp}</button>`).join('')+`<button onclick="battleUI()">戻る</button>`}
+function cast(i){const s=battle._sp[i];if(state.mp<s.mp){battleUI("MPが足りない！");return}state.mp-=s.mp;const d=Math.max(1,Math.floor(s.pow+Math.random()*6+state.lv-enemy.def/2));enemy.hp-=d;if(enemy.hp<=0)return win();enemyTurn(`${s.name}！ ${d}ダメージ！`)}
+function battleItems(){battle.innerHTML=`<h2>どうぐ</h2><button onclick="bUse('herb')">薬草 ×${state.items.herb}</button><button onclick="bUse('water')">聖水 ×${state.items.water}</button><button onclick="battleUI()">戻る</button>`}
+function bUse(k){if(state.items[k]<=0){battleUI("持っていない！");return}state.items[k]--;if(k==='herb')state.hp=Math.min(state.maxhp,state.hp+25);else state.mp=Math.min(state.maxmp,state.mp+12);enemyTurn(`${itemName(k)}を使った！`)}
+function enemyTurn(prefix){const d=Math.max(1,enemy.atk+Math.floor(Math.random()*5)-calcDef());state.hp-=d;updateTop();if(state.hp<=0)return die();battleUI(`${prefix}<br>${enemy.name}の攻撃！ ${d}ダメージ！`)}
+function runAway(){if(bossFight){battleUI("ボス戦からは逃げられない！");return}if(Math.random()<0.8){closePanels();showText("うまく逃げ切った！")}else enemyTurn("しかし回り込まれた！")}
+function win(){
+ const id=enemy.id,name=enemy.name,xp=enemy.xp,g=enemy.g;state.g+=g;state.xp+=xp;
+ if(bossFight){if(id==='mat')state.flags.boss1=true;if(id==='nishi')state.flags.boss2=true;if(id==='taku')state.flags.final=true}
  battle.style.display='none';mode='map';
- const lvl=levelCheck();
- let extra='';
- if(id==='mat')extra="\\n第一の証を手に入れた！";
- if(id==='nishi')extra="\\n第二の証を手に入れた！\\n二つの証が共鳴し、魔王の屋敷の結界が消えた！";
- if(id==='taku')extra="\\n\\n大魔王タクソーンは倒れた！\\n世界に平和が戻った！\\n\\n― おしまい ―";
- showText(`${name}を倒した！\\n${xp}EXP と ${g}G を手に入れた！${lvl}${extra}`);
- updateTop();
+ let text=`${name}を倒した！\\n${xp}EXP と ${g}G を手に入れた！${levelUp()}`;
+ if(id==='mat')text+="\\n第一の証を手に入れた！";
+ if(id==='nishi')text+="\\n第二の証を手に入れた！\\n魔王の屋敷の結界が消えた！";
+ if(id==='taku')text+="\\n\\n大魔王タクソーンは倒れた！\\n世界に平和が戻った！\\n\\n― おしまい ―";
+ showText(text);updateTop();
 }
-function levelCheck(){
- let out='';
- while(state.xp>=state.next&&state.lv<15){
-  state.xp-=state.next;state.lv++;state.next=Math.floor(state.next*1.45);
-  state.maxhp+=7;state.maxmp+=3;state.atk+=3;state.def+=2;
-  state.hp=state.maxhp;state.mp=state.maxmp;
-  out+=`\\nレベル${state.lv}になった！`;
-  const sp=spells.find(s=>s.lv===state.lv);
-  if(sp)out+=`\\n「${sp.name}」を覚えた！`;
- }
- return out;
-}
-function die(){
- battle.style.display='none';
- state.hp=state.maxhp;state.mp=state.maxmp;
- if(state.save){state.map=state.save.map;state.x=state.save.x;state.y=state.save.y}
- else{state.map='osaka';state.x=7;state.y=11}
- showText("こうせいは力尽きた……。\\n最後に記録した教会から再出発！");
- updateTop();
-}
+function levelUp(){let o='';while(state.xp>=state.next&&state.lv<15){state.xp-=state.next;state.lv++;state.next=Math.floor(state.next*1.45);state.maxhp+=7;state.maxmp+=3;state.atk+=3;state.def+=2;state.hp=state.maxhp;state.mp=state.maxmp;o+=`\\nレベル${state.lv}になった！`;const s=spells.find(s=>s.lv===state.lv);if(s)o+=`\\n「${s.name}」を覚えた！`}return o}
+function die(){battle.style.display='none';state.hp=state.maxhp;state.mp=state.maxmp;if(state.save){state.map=state.save.map;state.x=state.save.x;state.y=state.save.y}else{state.map='osaka';state.x=7;state.y=11}showText("こうせいは力尽きた……。\\n最後に記録した教会から再出発！");updateTop()}
 
-// ----- drawing -----
-function drawGround(m){
+// ---------- drawing ----------
+function ground(m){
  if(m.kind==='dungeon'){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-   ctx.fillStyle=(x+y)%2?'#454149':'#3d3941';ctx.fillRect(x*T,y*T,T,T);
-   ctx.strokeStyle='#2c2930';ctx.strokeRect(x*T,y*T,T,T);
-   if((x*7+y*11)%9===0){ctx.strokeStyle='#69636d';ctx.beginPath();ctx.moveTo(x*T+5,y*T+8);ctx.lineTo(x*T+11,y*T+6);ctx.lineTo(x*T+15,y*T+11);ctx.stroke()}
+   ctx.fillStyle=(x+y)%2?'#454149':'#3d3941';ctx.fillRect(x*T,y*T,T,T);ctx.strokeStyle='#2d2a31';ctx.strokeRect(x*T,y*T,T,T);
+   if((x*7+y*11)%10===0){ctx.strokeStyle='#6a6570';ctx.beginPath();ctx.moveTo(x*T+5,y*T+8);ctx.lineTo(x*T+11,y*T+6);ctx.lineTo(x*T+15,y*T+11);ctx.stroke()}
   }
  }else{
   ctx.fillStyle=m.bg;ctx.fillRect(0,0,360,360);
-  ctx.strokeStyle='#00000010';
-  for(let gx=0;gx<=360;gx+=T){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,360);ctx.stroke()}
-  for(let gy=0;gy<=360;gy+=T){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(360,gy);ctx.stroke()}
+  ctx.strokeStyle='#0000000f';
+  for(let i=0;i<=360;i+=T){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,360);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(360,i);ctx.stroke()}
  }
 }
-function drawWalls(m){
- for(const r of (m.walls||[])){
-  for(let yy=r[1];yy<r[1]+r[3];yy++)for(let xx=r[0];xx<r[0]+r[2];xx++){
-   ctx.fillStyle=m.kind==='dungeon'?'#25222a':'#202020';ctx.fillRect(xx*T,yy*T,T,T);
-   if(m.kind==='dungeon'){
-    ctx.fillStyle='#58525e';ctx.fillRect(xx*T+2,yy*T+2,T-4,7);
-    ctx.fillStyle='#35313a';ctx.fillRect(xx*T+3,yy*T+10,T-6,T-13);
-    ctx.strokeStyle='#17161b';ctx.strokeRect(xx*T+1,yy*T+1,T-2,T-2);
-   }
-  }
+function walls(m){
+ for(const r of (m.walls||[]))for(let yy=r[1];yy<r[1]+r[3];yy++)for(let xx=r[0];xx<r[0]+r[2];xx++){
+  ctx.fillStyle=m.kind==='dungeon'?'#242229':'#202020';ctx.fillRect(xx*T,yy*T,T,T);
+  if(m.kind==='dungeon'){ctx.fillStyle='#57525d';ctx.fillRect(xx*T+2,yy*T+2,T-4,7);ctx.fillStyle='#34313a';ctx.fillRect(xx*T+3,yy*T+10,T-6,T-13)}
  }
 }
-function drawBuilding(b){
- const x=b.x*T,y=b.y*T,w=b.w*T,h=b.h*T;
- ctx.fillStyle='#00000033';ctx.fillRect(x+6,y+8,w,h-3);
- ctx.fillStyle=b.type==='church'?'#c8c4d6':'#d7bb8d';ctx.fillRect(x+2,y+13,w-4,h-15);
- let roof='#914531';
- if(b.type==='church')roof='#555e91';
- if(b.type==='inn')roof='#8d4d73';
- if(b.type==='weapon')roof='#8b3d2d';
- if(b.type==='armor')roof='#46617e';
- if(b.type==='item')roof='#47764f';
- ctx.fillStyle='#3b2b25';ctx.fillRect(x-3,y+9,w+6,5);
- ctx.fillStyle=roof;ctx.fillRect(x-4,y+2,w+8,12);
- ctx.fillStyle='#ffffff20';ctx.fillRect(x-1,y+4,w+2,3);
- ctx.fillStyle='#463729';ctx.fillRect(x+6,y+23,15,12);ctx.fillRect(x+w-21,y+23,15,12);
- ctx.fillStyle='#8dd5e8';ctx.fillRect(x+8,y+25,11,8);ctx.fillRect(x+w-19,y+25,11,8);
- ctx.fillStyle='#3b2a22';ctx.fillRect(x+w/2-10,y+h-25,20,23);
- ctx.fillStyle='#76503a';ctx.fillRect(x+w/2-7,y+h-22,14,20);
- ctx.fillStyle='#5b402a';ctx.fillRect(x+w/2-23,y+8,46,18);
- ctx.fillStyle='#f2dfb7';ctx.fillRect(x+w/2-20,y+10,40,14);
- ctx.fillStyle='#28211b';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(b.label,x+w/2,y+20);ctx.textAlign='left';
- if(b.type==='church'){ctx.fillStyle='#222';ctx.fillRect(x+w/2-1,y-5,3,9);ctx.fillRect(x+w/2-5,y-2,11,3)}
+function buildingArt(b){
+ const x=b.x*T,y=b.y*T,w=b.w*T,h=b.h*T;ctx.fillStyle='#00000035';ctx.fillRect(x+6,y+7,w,h-3);
+ ctx.fillStyle=b.type==='church'?'#c9c5d8':'#d7bb8d';ctx.fillRect(x+2,y+13,w-4,h-15);
+ let roof={weapon:'#8b3d2d',armor:'#46617e',inn:'#8d4d73',church:'#555e91',item:'#47764f'}[b.type]||'#914531';
+ ctx.fillStyle='#3b2b25';ctx.fillRect(x-3,y+9,w+6,5);ctx.fillStyle=roof;ctx.fillRect(x-4,y+2,w+8,12);ctx.fillStyle='#ffffff20';ctx.fillRect(x-1,y+4,w+2,3);
+ ctx.fillStyle='#463729';ctx.fillRect(x+6,y+23,15,12);ctx.fillRect(x+w-21,y+23,15,12);ctx.fillStyle='#8dd5e8';ctx.fillRect(x+8,y+25,11,8);ctx.fillRect(x+w-19,y+25,11,8);
+ ctx.fillStyle='#3b2a22';ctx.fillRect(x+w/2-10,y+h-25,20,23);ctx.fillStyle='#76503a';ctx.fillRect(x+w/2-7,y+h-22,14,20);
+ ctx.fillStyle='#5b402a';ctx.fillRect(x+w/2-23,y+8,46,18);ctx.fillStyle='#f2dfb7';ctx.fillRect(x+w/2-20,y+10,40,14);ctx.fillStyle='#28211b';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(b.label,x+w/2,y+20);ctx.textAlign='left';
 }
-function drawNpc(px,py,body='#c05050',hair='#2a1b12',style=0){
- ctx.fillStyle='#00000035';ctx.fillRect(px+5,py+20,15,3);
- ctx.fillStyle=style%2?'#463a38':'#283143';ctx.fillRect(px+7,py+15,4,6);ctx.fillRect(px+13,py+15,4,6);
- ctx.fillStyle=body;ctx.fillRect(px+5,py+9,14,8);ctx.fillRect(px+3,py+10,3,6);ctx.fillRect(px+19,py+10,3,6);
- ctx.fillStyle='#f0c19c';ctx.fillRect(px+7,py+3,10,8);
- ctx.fillStyle=hair;
- if(style%3===0){ctx.fillRect(px+6,py+1,12,4);ctx.fillRect(px+6,py+4,3,3)}
- else if(style%3===1){ctx.fillRect(px+6,py+1,12,3);ctx.fillRect(px+15,py+3,3,4)}
- else{ctx.fillRect(px+7,py+1,10,3);ctx.fillRect(px+6,py+3,3,3);ctx.fillRect(px+15,py+3,3,3)}
- ctx.fillStyle='#222';ctx.fillRect(px+9,py+6,2,1);ctx.fillRect(px+14,py+6,2,1);
+function npcArt(px,py,c,i){
+ ctx.fillStyle='#0004';ctx.fillRect(px+5,py+20,15,3);ctx.fillStyle='#38313a';ctx.fillRect(px+7,py+15,4,6);ctx.fillRect(px+13,py+15,4,6);
+ ctx.fillStyle=c;ctx.fillRect(px+5,py+9,14,8);ctx.fillRect(px+3,py+10,3,6);ctx.fillRect(px+19,py+10,3,6);
+ ctx.fillStyle='#f0c19c';ctx.fillRect(px+7,py+3,10,8);ctx.fillStyle=i%2?'#51351f':'#2b211b';ctx.fillRect(px+6,py+1,12,4);ctx.fillStyle='#222';ctx.fillRect(px+9,py+6,2,1);ctx.fillRect(px+14,py+6,2,1);
 }
-function drawHero(px,py){
- ctx.fillStyle='#00000045';ctx.fillRect(px+4,py+20,17,3);
- ctx.fillStyle='#a5272d';ctx.fillRect(px+4,py+8,17,11);ctx.fillRect(px+3,py+13,4,7);
- ctx.fillStyle='#392d25';ctx.fillRect(px+7,py+16,4,6);ctx.fillRect(px+14,py+16,4,6);
- ctx.fillStyle='#2764bd';ctx.fillRect(px+6,py+9,13,9);
- ctx.fillStyle='#d7b45a';ctx.fillRect(px+6,py+14,13,2);
- ctx.fillStyle='#f1c19c';ctx.fillRect(px+8,py+3,10,8);
- ctx.fillStyle='#382414';ctx.fillRect(px+7,py+1,12,4);ctx.fillRect(px+7,py+4,3,3);
- ctx.fillStyle='#171717';ctx.fillRect(px+10,py+6,2,1);ctx.fillRect(px+15,py+6,2,1);
- ctx.fillStyle='#d9dde3';ctx.fillRect(px+20,py+8,2,10);ctx.fillStyle='#b9973e';ctx.fillRect(px+18,py+13,6,2);
+function heroArt(px,py){
+ ctx.fillStyle='#0005';ctx.fillRect(px+4,py+20,17,3);ctx.fillStyle='#a5272d';ctx.fillRect(px+3,py+8,18,12);
+ ctx.fillStyle='#392d25';ctx.fillRect(px+7,py+16,4,6);ctx.fillRect(px+14,py+16,4,6);ctx.fillStyle='#2764bd';ctx.fillRect(px+6,py+9,13,9);
+ ctx.fillStyle='#d7b45a';ctx.fillRect(px+6,py+14,13,2);ctx.fillStyle='#f1c19c';ctx.fillRect(px+8,py+3,10,8);ctx.fillStyle='#382414';ctx.fillRect(px+7,py+1,12,4);
+ ctx.fillStyle='#171717';ctx.fillRect(px+10,py+6,2,1);ctx.fillRect(px+15,py+6,2,1);ctx.fillStyle='#d9dde3';ctx.fillRect(px+20,py+8,2,10);ctx.fillStyle='#b9973e';ctx.fillRect(px+18,py+13,6,2);
 }
-function drawDungeonDecor(m){
+function dungeonDecor(m){
  if(m.kind!=='dungeon')return;
- for(let i=0;i<10;i++){
-  const x=((i*37+17)%13+1)*T,y=((i*53+9)%12+1)*T;
-  const gx=Math.floor(x/T),gy=Math.floor(y/T);
-  if(!blocked(gx,gy)){
-   ctx.fillStyle='#5a5660';ctx.beginPath();ctx.arc(x+7,y+14,5+(i%3),0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='#77717c';ctx.fillRect(x+5,y+10,5,2);
-  }
- }
- for(const [tx,ty] of [[2,2],[12,4],[5,9],[9,12]]){
-  ctx.fillStyle='#6f4a2c';ctx.fillRect(tx*T+10,ty*T+10,3,10);
-  ctx.fillStyle='#ffcb54';ctx.beginPath();ctx.arc(tx*T+11,ty*T+7,5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#ff7a32';ctx.beginPath();ctx.arc(tx*T+11,ty*T+8,3,0,Math.PI*2);ctx.fill();
- }
+ for(const [tx,ty] of [[2,2],[12,4],[5,9],[9,12]]){ctx.fillStyle='#6f4a2c';ctx.fillRect(tx*T+10,ty*T+10,3,10);ctx.fillStyle='#ffcb54';ctx.beginPath();ctx.arc(tx*T+11,ty*T+7,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff7a32';ctx.beginPath();ctx.arc(tx*T+11,ty*T+8,3,0,Math.PI*2);ctx.fill()}
 }
-function drawMonsterIcon(x,y,color,boss=false){
- ctx.fillStyle='#00000040';ctx.beginPath();ctx.ellipse(x+12,y+22,boss?12:9,4,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle=color;ctx.beginPath();ctx.arc(x+12,y+11,boss?10:8,0,Math.PI*2);ctx.fill();
- ctx.fillRect(x+(boss?4:6),y+11,boss?16:12,boss?10:8);
- ctx.fillStyle='#fff';ctx.fillRect(x+8,y+8,3,3);ctx.fillRect(x+15,y+8,3,3);
- ctx.fillStyle='#111';ctx.fillRect(x+9,y+9,1,1);ctx.fillRect(x+16,y+9,1,1);
-}
+function monsterArt(x,y,c,big=false){ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(x+12,y+22,big?12:9,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+12,y+11,big?10:8,0,Math.PI*2);ctx.fill();ctx.fillRect(x+(big?4:6),y+11,big?16:12,big?10:8);ctx.fillStyle='#fff';ctx.fillRect(x+8,y+8,3,3);ctx.fillRect(x+15,y+8,3,3)}
 function render(){
  if(!state)return;
- const m=maps[state.map];
- drawGround(m);drawWalls(m);drawDungeonDecor(m);
-
- for(const b of (m.buildings||[]))drawBuilding(b);
-
- for(const s of (m.spots||[])){
-  ctx.fillStyle=s.locked?'#5b255d':'#765d35';ctx.fillRect(s.x*T,s.y*T,T,T);
-  ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText(s.label,s.x*T-10,s.y*T-3);
- }
-
- if(m.exit){
-  ctx.fillStyle='#f6d64a';ctx.fillRect(m.exit.x1*T+2,m.exit.y*T+2,(m.exit.x2-m.exit.x1+1)*T-4,T-4);
-  ctx.fillStyle='#30260a';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-  ctx.fillText('出口',((m.exit.x1+m.exit.x2+1)/2)*T,m.exit.y*T+16);ctx.textAlign='left';
- }
-
- const npcColors=['#c14f4f','#4d7fb8','#699b55','#bd8744','#7f62a5'];
- (m.npcs||[]).forEach((n,i)=>{
-  drawNpc(n.x*T,n.y*T,npcColors[i%npcColors.length],i%2?'#51351f':'#2b211b',i);
-  if((n.quest===1&&!state.flags.quest1)||(n.quest===2&&!state.flags.quest2)){
-   ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(n.x*T+12,n.y*T-3,7,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='#111';ctx.font='bold 11px sans-serif';ctx.fillText('!',n.x*T+10,n.y*T+1);
-  }
- });
-
- for(const ch of (m.chests||[]))if(!state.chests[ch.id]){
-  ctx.fillStyle='#5b371c';ctx.fillRect(ch.x*T+2,ch.y*T+9,20,12);
-  ctx.fillStyle='#d69a32';ctx.fillRect(ch.x*T+3,ch.y*T+6,18,8);
-  ctx.fillStyle='#f0c85a';ctx.fillRect(ch.x*T+10,ch.y*T+11,4,6);
- }
-
- if(m.boss&&!bossDone(m.boss.id))drawMonsterIcon(m.boss.x*T,m.boss.y*T,bosses[m.boss.id].color,true);
-
- // draw hero LAST so it can never disappear behind scenery
- drawHero(state.x*T,state.y*T);
-
- if(m.kind==='town'){
-  const guide=(state.map==='osaka'&&!state.flags.quest1)||(state.map==='kyoto'&&!state.flags.quest2)
-   ?'Aで「！」の住人に話しかけよう'
-   :'黄色い「出口」からフィールドへ';
-  ctx.fillStyle='#fffef0ee';ctx.fillRect(55,318,250,28);
-  ctx.strokeStyle='#6f5a2d';ctx.strokeRect(55,318,250,28);
-  ctx.fillStyle='#171717';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(guide,180,337);ctx.textAlign='left';
- }
+ const m=maps[state.map]; // ONE map source only
+ ground(m);walls(m);dungeonDecor(m);
+ for(const b of (m.buildings||[]))buildingArt(b);
+ for(const s of (m.spots||[])){ctx.fillStyle=s.locked?'#5b255d':'#765d35';ctx.fillRect(s.x*T,s.y*T,T,T);ctx.fillStyle='#fff';ctx.font='9px sans-serif';ctx.fillText(s.label,s.x*T-10,s.y*T-3)}
+ if(m.exit){ctx.fillStyle='#f6d64a';ctx.fillRect(m.exit.x1*T+2,m.exit.y*T+2,(m.exit.x2-m.exit.x1+1)*T-4,T-4);ctx.fillStyle='#30260a';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('出口',((m.exit.x1+m.exit.x2+1)/2)*T,m.exit.y*T+16);ctx.textAlign='left'}
+ const cols=['#c14f4f','#4d7fb8','#699b55','#bd8744','#7f62a5'];
+ (m.npcs||[]).forEach((n,i)=>{npcArt(n.x*T,n.y*T,cols[i%cols.length],i);if((n.quest===1&&!state.flags.quest1)||(n.quest===2&&!state.flags.quest2)){ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(n.x*T+12,n.y*T-3,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.font='bold 11px sans-serif';ctx.fillText('!',n.x*T+10,n.y*T+1)}});
+ for(const c of (m.chests||[]))if(!state.chests[c.id]){ctx.fillStyle='#5b371c';ctx.fillRect(c.x*T+2,c.y*T+9,20,12);ctx.fillStyle='#d69a32';ctx.fillRect(c.x*T+3,c.y*T+6,18,8);ctx.fillStyle='#f0c85a';ctx.fillRect(c.x*T+10,c.y*T+11,4,6)}
+ if(m.boss&&!bossDone(m.boss.id))monsterArt(m.boss.x*T,m.boss.y*T,bosses[m.boss.id].color,true);
+ heroArt(state.x*T,state.y*T); // ALWAYS LAST
+ if(m.kind==='town'){const guide=(state.map==='osaka'&&!state.flags.quest1)||(state.map==='kyoto'&&!state.flags.quest2)?'Aで「！」の住人に話しかけよう':'黄色い広い「出口」から外へ';ctx.fillStyle='#fffef0ee';ctx.fillRect(48,318,264,28);ctx.strokeStyle='#6f5a2d';ctx.strokeRect(48,318,264,28);ctx.fillStyle='#171717';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(guide,180,337);ctx.textAlign='left'}
  updateTop();
 }
 
-// ----- joystick -----
-const controls=document.getElementById('controls');
-const moveZone=document.getElementById('moveZone');
-const joystick=document.getElementById('joystick');
-const stick=document.getElementById('stick');
-let joyActive=false,joyPointer=null,cx=0,cy=0,joyDir='',joyTimer=null;
-function stopJoy(){if(joyTimer){clearInterval(joyTimer);joyTimer=null}}
-function resetJoy(){joyActive=false;joyPointer=null;joyDir='';stopJoy();joystick.style.display='none';stick.style.left='38px';stick.style.top='38px'}
-function stepDir(d){
- if(d==='left')move(-1,0,'left');
- if(d==='right')move(1,0,'right');
- if(d==='up')move(0,-1,'up');
- if(d==='down')move(0,1,'down');
-}
-function updateJoy(e){
- let dx=e.clientX-cx,dy=e.clientY-cy;
- const max=34,dist=Math.hypot(dx,dy)||1;
+// ---------- fixed joystick ----------
+const joyBase=document.getElementById('joyBase'),joyKnob=document.getElementById('joyKnob');
+let joyPointer=null,joyActive=false,joyDir='',joyInterval=null;
+function stopRepeat(){if(joyInterval){clearInterval(joyInterval);joyInterval=null}}
+function joyReset(){joyPointer=null;joyActive=false;joyDir='';stopRepeat();joyKnob.style.left='43px';joyKnob.style.top='43px'}
+function joyStep(d){if(d==='left')move(-1,0,'left');else if(d==='right')move(1,0,'right');else if(d==='up')move(0,-1,'up');else if(d==='down')move(0,1,'down')}
+function joyUpdate(e){
+ const r=joyBase.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+ let dx=e.clientX-cx,dy=e.clientY-cy;const max=36,dist=Math.hypot(dx,dy)||1;
  if(dist>max){dx=dx/dist*max;dy=dy/dist*max}
- stick.style.left=(38+dx)+'px';stick.style.top=(38+dy)+'px';
+ joyKnob.style.left=(43+dx)+'px';joyKnob.style.top=(43+dy)+'px';
  let d='';
- if(Math.hypot(dx,dy)>14)d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');
- if(d!==joyDir){
-  joyDir=d;stopJoy();
-  if(d){stepDir(d);joyTimer=setInterval(()=>{if(joyActive&&joyDir)stepDir(joyDir)},120)}
- }
+ if(Math.hypot(dx,dy)>12)d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');
+ if(d!==joyDir){joyDir=d;stopRepeat();if(d){joyStep(d);joyInterval=setInterval(()=>{if(joyActive&&joyDir)joyStep(joyDir)},135)}}
 }
-moveZone.addEventListener('pointerdown',e=>{
- if(mode!=='map')return;
- e.preventDefault();joyActive=true;joyPointer=e.pointerId;moveZone.setPointerCapture(e.pointerId);
- const r=controls.getBoundingClientRect(),rad=58;
- let x=e.clientX-r.left,y=e.clientY-r.top;
- x=Math.max(rad+4,Math.min(r.width*.56-rad-4,x));
- y=Math.max(rad+4,Math.min(r.height-rad-4,y));
- cx=r.left+x;cy=r.top+y;
- joystick.style.left=(x-rad)+'px';joystick.style.top=(y-rad)+'px';joystick.style.display='block';
- updateJoy(e);
-});
-moveZone.addEventListener('pointermove',e=>{if(joyActive&&e.pointerId===joyPointer){e.preventDefault();updateJoy(e)}});
-moveZone.addEventListener('pointerup',e=>{if(e.pointerId===joyPointer)resetJoy()});
-moveZone.addEventListener('pointercancel',e=>{if(e.pointerId===joyPointer)resetJoy()});
+joyBase.addEventListener('pointerdown',e=>{if(mode!=='map')return;e.preventDefault();joyActive=true;joyPointer=e.pointerId;joyBase.setPointerCapture(e.pointerId);joyUpdate(e)});
+joyBase.addEventListener('pointermove',e=>{if(joyActive&&e.pointerId===joyPointer){e.preventDefault();joyUpdate(e)}});
+joyBase.addEventListener('pointerup',e=>{if(e.pointerId===joyPointer)joyReset()});
+joyBase.addEventListener('pointercancel',e=>{if(e.pointerId===joyPointer)joyReset()});
 
-document.getElementById('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='message')closeMessage();else if(mode==='map')interact()});
+document.getElementById('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='message')closeText();else if(mode==='map')interact()});
 document.getElementById('menuBtn').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='map')openMenu();else if(mode==='menu')closePanels()});
-document.addEventListener('keydown',e=>{
- if(e.key==='ArrowUp')move(0,-1,'up');
- if(e.key==='ArrowDown')move(0,1,'down');
- if(e.key==='ArrowLeft')move(-1,0,'left');
- if(e.key==='ArrowRight')move(1,0,'right');
- if(e.key==='Enter'||e.key===' '){if(mode==='message')closeMessage();else if(mode==='map')interact()}
-});
-
-ctx.imageSmoothingEnabled=false;
 </script>
 </body>
 </html>
