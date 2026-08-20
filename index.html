@@ -72,7 +72,7 @@ const msg=document.getElementById('msg'),menu=document.getElementById('menu'),ba
 const T=24,W=15,H=15;
 ctx.imageSmoothingEnabled=false;
 
-let state=null,mode='title',facing='down',enemy=null,bossFight=false,lastEncounterStep=0;
+let state=null,mode='title',facing='down',enemy=null,bossFight=false,lastEncounterStep=0,bossTurn=0;
 
 const spells=[
  {name:'屁',lv:1,mp:2,pow:8},{name:'静電気',lv:3,mp:4,pow:16},
@@ -93,8 +93,8 @@ const monsters={
 const bosses={
  mat:{name:'まっちゃん',hp:75,atk:8,def:4,xp:55,g:150,color:'#e27a3f'},
  nishi:{name:'ニシ',hp:120,atk:17,def:7,xp:90,g:300,color:'#6f78e8'},
- taku:{name:'大魔王タクソーン',hp:230,atk:20,def:10,xp:0,g:0,color:'#8d2bb5'},
- taku2:{name:'大魔王タクソーン・真の姿',hp:300,atk:23,def:12,xp:0,g:0,color:'#d02f91'}
+ taku:{name:'大魔王タクソーン',hp:320,atk:65,def:20,xp:0,g:0,color:'#8d2bb5'},
+ taku2:{name:'大魔王タクソーン・真の姿',hp:560,atk:78,def:30,xp:0,g:0,color:'#d02f91'}
 };
 
 const maps={
@@ -346,7 +346,9 @@ function randomBattle(){
  startBattle(pool[Math.floor(Math.random()*pool.length)],false);
 }
 function startBattle(id,boss){
- mode='battle';bossFight=boss;const src=boss?bosses[id]:monsters[id];enemy={...src,id,maxhp:src.hp};battle.style.display='block';battleUI(`${enemy.name}が あらわれた！`);
+ mode='battle';bossFight=boss;bossTurn=0;
+ if(id==='taku'){state.hp=state.maxhp;state.mp=state.maxmp;updateTop()}
+ const src=boss?bosses[id]:monsters[id];enemy={...src,id,maxhp:src.hp};battle.style.display='block';battleUI(`${enemy.name}が あらわれた！`);
 }
 function battleUI(t='どうする？'){
  battle.innerHTML=`<h2>${enemy.name}</h2>${bossFight?'<canvas id="bossPortrait" width="360" height="210" style="width:100%;height:auto;background:#130f18;border:2px solid #555"></canvas>':''}<p>敵HP ${Math.max(0,enemy.hp)}/${enemy.maxhp}</p><p>${t}</p><button onclick="attack()">たたかう</button><button onclick="spellMenu()">じゅもん</button><button onclick="battleItems()">どうぐ</button><button onclick="runAway()">にげる</button>`;
@@ -359,7 +361,12 @@ function spellMenu(){battle._sp=spells.filter(s=>state.lv>=s.lv);battle.innerHTM
 function cast(i){const s=battle._sp[i];if(state.mp<s.mp){battleUI("MPが足りない！");return}state.mp-=s.mp;const d=Math.max(1,Math.floor(s.pow+Math.random()*6+state.lv-enemy.def/2));enemy.hp-=d;if(enemy.hp<=0)return win();enemyTurn(`${s.name}！ ${d}ダメージ！`)}
 function battleItems(){battle.innerHTML=`<h2>どうぐ</h2><button onclick="bUse('herb')">薬草 ×${state.items.herb}</button><button onclick="bUse('water')">聖水 ×${state.items.water}</button><button onclick="battleUI()">戻る</button>`}
 function bUse(k){if(state.items[k]<=0){battleUI("持っていない！");return}state.items[k]--;if(k==='herb')state.hp=Math.min(state.maxhp,state.hp+25);else state.mp=Math.min(state.maxmp,state.mp+12);enemyTurn(`${itemName(k)}を使った！`)}
-function enemyTurn(prefix){const d=Math.max(1,enemy.atk+Math.floor(Math.random()*5)-calcDef());state.hp-=d;updateTop();if(state.hp<=0)return die();battleUI(`${prefix}<br>${enemy.name}の攻撃！ ${d}ダメージ！`)}
+function enemyTurn(prefix){
+ bossTurn++;
+ let bonus=0,move=`${enemy.name}の攻撃！`;
+ if(enemy.id==='taku2'&&bossTurn%3===0){bonus=10;move='大魔王タクソーン・真の姿の「暗黒の一撃」！'}
+ const d=Math.max(1,enemy.atk+bonus+Math.floor(Math.random()*5)-calcDef());state.hp-=d;updateTop();if(state.hp<=0)return die();battleUI(`${prefix}<br>${move} ${d}ダメージ！`)
+}
 function runAway(){if(bossFight){battleUI("ボス戦からは逃げられない！");return}if(Math.random()<0.8){closePanels();showText("うまく逃げ切った！")}else enemyTurn("しかし回り込まれた！")}
 function win(){
  const id=enemy.id,name=enemy.name,xp=enemy.xp,g=enemy.g;
